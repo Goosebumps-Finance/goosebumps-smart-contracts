@@ -13,8 +13,8 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  const factory = "0xDe7ab60427914b4d240CE33F200eb17FE6d0B9AA";
-  const WBNB = "0x918f0C3B01d5aC7E2fcBbcEB63616227E96d8FE7"
+  const factory = "0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56"; // BSC Testnet Factory Address
+  const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"; // BSC Testnet WBNB Address
   // We get the contract to deploy
   const GooseBumpsSwapRouter02 = await ethers.getContractFactory("GooseBumpsSwapRouter02");
   const gooseBumpsSwapRouter02 = await GooseBumpsSwapRouter02.deploy(factory, WBNB);
