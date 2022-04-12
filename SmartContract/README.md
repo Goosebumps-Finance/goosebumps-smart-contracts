@@ -53,7 +53,7 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
 |-------------------|-------------------|------------------|------------------|
-| GooseBumps First Token | GBFT | 0xA6454bbA55F46Ef488c599c44867DF5eE3D6F543 |
+| GooseBumps First Token | GBFT | 0xA6454bbA55F46Ef488c599c44867DF5eE3D6F543 | 0x3755298811C230597a075EFA05725930Aa38A0B8 |
 | GooseBumps Second Token | GBST | 0xA490CfCE72c5d7344A177c6fCAdfBf0991816e93 |0xE76eE04D2A58Aeaff36763DD82E778d860501751 |
 | GooseBumps Third Token | GBTT | 0x2FC145e7A2e6E1E83C55B7e73422072B70C73A77 | 0x4365E31B76196D23b143178A5f845D47c196766b |
 | GooseBumps Firth Token | GBFT | 0x238CD26cccc1C714201Fc8bf49d453a39f494209 | 0xdeEeB6041bD4E3922E18f1F25771C71d7F64579e |
