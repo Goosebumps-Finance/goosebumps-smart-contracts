@@ -14,8 +14,8 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const _tokenName = "GooseBumps Third Token";
-  const _tokenSymbol = "GBTT";
+  const _tokenName = "GooseBumps Firth Token";
+  const _tokenSymbol = "GBFT";
   const ERC20Token = await ethers.getContractFactory("ERC20Token");
   const erc20Token = await ERC20Token.deploy(_tokenName, _tokenSymbol);
 

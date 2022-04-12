@@ -1,5 +1,5 @@
-const _tokenName = "GooseBumps Third Token";
-const _tokenSymbol = "GBTT";
+const _tokenName = "GooseBumps Firth Token";
+const _tokenSymbol = "GBFT";
 
 module.exports = [
     _tokenName,
