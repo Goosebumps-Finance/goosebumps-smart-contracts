@@ -430,14 +430,15 @@ interface IDEXRouter {
 }
 
 contract ERC20Token is ERC20, Ownable {
-    // address public pair;
-    // address public WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
-    // address public router = 0x843C221ac1f392D01aa80DbFD195E19AB1EEF21e;
+    // BSC Testnet
+    address public pair;
+    address public WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
+    address public router = 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02;
     event Mint(address indexed account, uint256 amount);
     event Burn(address indexed account, uint256 amount);
 
-    constructor() ERC20 ("GooseBumps First Token", "GBFT") {
-        // pair = IDEXFactory(IDEXRouter(router).factory()).createPair(WBNB, address(this));
+    constructor(string memory _tokenName, string memory _tokenSymbol) ERC20 (_tokenName, _tokenSymbol) {
+        pair = IDEXFactory(IDEXRouter(router).factory()).createPair(WBNB, address(this));
         // Quantity : 1 million = 1,000, 000
         _mint(msg.sender, 10 ** (6 + 18)); // supply 1 million
 
