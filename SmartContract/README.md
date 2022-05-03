@@ -45,11 +45,17 @@ npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
 
+## BSC Testnet
+
+| Multi-Sig Wallet | Contract Address |
+|-------------------|------------------|
+| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
+
 | Contract Name | Contract Address |
 |-------------------|------------------|
-| WBNB | 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd |
-| GooseBumpsSwapFactory | 0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56 |
 | GooseBumpsSwapRouter02 | 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02 |
+| GooseBumpsSwapFactory | 0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56 |
+| WBNB | 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd |
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
 |-------------------|-------------------|------------------|------------------|
