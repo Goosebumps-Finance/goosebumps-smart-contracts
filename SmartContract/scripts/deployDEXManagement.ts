@@ -14,18 +14,21 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const _router = "0x31cB34991756FD1564b0DEBF2BFF3E522085EC02";
+  const _router = "0x31cB34991756FD1564b0DEBF2BFF3E522085EC02"; // bsc testnet goosebumps dex
   const _treasury = "0x821965C1fD8B60D4B33E23C5832E2A7662faAADC";
+  const _swapFee = 10; // 0.1%
+  const _swapFee0x = 5; // 0.05%
   const DEXManagement = await ethers.getContractFactory("DEXManagement");
-  const dexManagement = await DEXManagement.deploy(_router, _treasury);
+  const dexManagement = await DEXManagement.deploy(_router, _treasury, _swapFee, _swapFee0x);
 
   await dexManagement.deployed();
 
   console.log("DEXManagement deployed to:", dexManagement.address);
 
-  // const pair = await dexManagement.pair();
-
-  // console.log("pair address:", pair);
+  console.log("TREASURY address of DEXManagement:", await dexManagement.TREASURY());
+  console.log("SWAP_FEE address of DEXManagement:", await dexManagement.SWAP_FEE());
+  console.log("SWAP_FEE address of DEXManagement:", await dexManagement.SWAP_FEE_0X());
+  console.log("router address of DEXManagement:", await dexManagement.dexRouter_());
 
 }
 

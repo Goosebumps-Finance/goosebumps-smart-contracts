@@ -104,3 +104,4 @@ dist
 .tern-port
 SmartContract/.address
 SmartContract/package-lock.json
+SmartContract/.command

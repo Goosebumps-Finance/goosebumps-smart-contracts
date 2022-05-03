@@ -9,25 +9,29 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "./DEX/interfaces/IGooseBumpsSwapRouter02.sol";
 import "./DEX/interfaces/IGooseBumpsSwapFactory.sol";
 
-contract SwapOnPolygon is Ownable, Pausable {
+contract DEXManagement is Ownable, Pausable {
     
     //--------------------------------------
     // State variables
     //--------------------------------------
 
-    address public TREASURY;           // Must be multi-sig wallet
-    uint256 public SWAP_FEE;           // Fee = SWAP_FEE / 10000
+    address public TREASURY;                // Must be multi-sig wallet
+    uint256 public SWAP_FEE;                // Fee = SWAP_FEE / 10000
+    uint256 public SWAP_FEE_0X;             // Fee = SWAP_FEE_0X / 10000
 
-    address public dexRouter_;
-    address public dexFactory_;
-    address public WETH;
+    IGooseBumpsSwapRouter02 public dexRouter_;
 
     //-------------------------------------------------------------------------
     // EVENTS
     //-------------------------------------------------------------------------
 
-    event Received(address, uint);
-    event Fallback(address, uint);
+    event LogReceived(address indexed, uint);
+    event LogFallback(address indexed, uint);
+    event LogSetTreasury(address indexed, address indexed);
+    event LogSetSwapFee(address indexed, uint256);
+    event LogSetSwapFee0x(address indexed, uint256);
+    event LogSetDexRouter(address indexed, address indexed);
+
     // event SetContractStatus(address addr, uint256 pauseValue);
     // event WithdrawAll(address addr, uint256 token, uint256 native);
 
@@ -36,78 +40,38 @@ contract SwapOnPolygon is Ownable, Pausable {
     //-------------------------------------------------------------------------
 
     /**
+     * @param   _router: router address
+     * @param   _treasury: treasury address
+     * @param   _swapFee: swap fee value
+     * @param   _swapFee0x: swap fee for 0x value
      */
-    constructor(address _router, address _treasury, uint256 _swapFee ) 
+    constructor(address _router, address _treasury, uint256 _swapFee, uint256 _swapFee0x ) 
     {
-        dexRouter_ = _router;
-        dexFactory_ = IGooseBumpsSwapRouter02(dexRouter_).factory();
-        WETH = IGooseBumpsSwapRouter02(dexRouter_).WETH();
+        dexRouter_ = IGooseBumpsSwapRouter02(_router);
         TREASURY = _treasury;
         SWAP_FEE = _swapFee;
+        SWAP_FEE_0X = _swapFee0x;
     }
 
-    receive() external payable {
-        emit Received(msg.sender, msg.value);
+    /**
+     * @param   _tokenA: tokenA contract address
+     * @param   _tokenB: tokenB contract address
+     * @return  bool: if pair is in DEX, return true, else, return false.
+     */
+    function isPairExists(address _tokenA, address _tokenB) public view returns(bool){        
+        return IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, _tokenB) != address(0);
     }
 
-    fallback() external payable { 
-        emit Fallback(msg.sender, msg.value);
+    /**
+     * @param   _tokenA: tokenA contract address
+     * @param   _tokenB: tokenB contract address
+     * @return  bool: if path is in DEX, return true, else, return false.
+     */
+    function isPathExists(address _tokenA, address _tokenB) public view returns(bool){        
+        return IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, _tokenB) != address(0) || 
+            (IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, dexRouter_.WETH()) != address(0) && 
+            IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(dexRouter_.WETH(), _tokenB) != address(0));
     }
-
-    // function isPairExists(address _Atoken, address _Btoken) public view returns(bool){        
-    //     return _dexFactory.getPair(_Atoken, _Btoken) != address(0);
-    // }
-
-    // function isSwapPathExists(address _Atoken, address _Btoken) public view returns(bool){        
-    //     return _dexFactory.getPair(_Atoken, _Btoken) != address(0) || 
-    //         (_dexFactory.getPair(_Atoken, WETH) != address(0) && _dexFactory.getPair(WETH, _Btoken) != address(0));
-    // }
-
-    // function getContractStatus() external view returns (uint8) {
-    //     return pauseContract;
-    // }
-
-    // function setContractStatus(uint8 _newPauseContract) external onlyOwner {
-    //     pauseContract = _newPauseContract;
-    //     emit SetContractStatus(msg.sender, _newPauseContract);
-    // }
-
-    // function setDexFactoryAddress(address _addr) public onlyOwner{
-    //     require(pauseContract == 0, "Contract Paused");
-    //     dexFactoryAddress = _addr;
-    // }
-
-    // function getDexFactoryAddress() public view returns(address){
-    //     return dexFactoryAddress;
-    // }
-
-    // function setNativeWrappedCurrencyAddress(address _addr) public onlyOwner{
-    //     require(pauseContract == 0, "Contract Paused");
-    //     WETH = _addr;
-    // }
-
-    // function getnativeWrappedCurrencyAddress() public view returns(address){
-    //     return WETH;
-    // }
-
-    // function setTreasury(address _addr) public onlyOwner{
-    //     require(pauseContract == 0, "Contract Paused");
-    //     TREASURY = _addr;
-    // }
-
-    // function getTreasury() public view returns(address){
-    //     return TREASURY;
-    // }
-
-    // function setDexRouter(address _newRouter) public onlyOwner{
-    //     require(pauseContract == 0, "Contract Paused");
-    //     _dexRouter = IGooseBumpsSwapRouter02(_newRouter);
-    //     _dexFactory = _dexRouter.factory();
-    // }
-
-    // function getDexRouter() public view returns(address){
-    //     return address(_dexRouter);
-    // }
 
     // function swap(address _Aaddress, address _Baddress, uint256 _amountIn, uint256 _slippage) public 
     // {
@@ -233,5 +197,52 @@ contract SwapOnPolygon is Ownable, Pausable {
     // function getSelector(string calldata _func) external pure returns (bytes4) {
     //     return bytes4(keccak256(bytes(_func)));
     // }
-}
 
+    receive() external payable {
+        emit LogReceived(msg.sender, msg.value);
+    }
+
+    fallback() external payable { 
+        emit LogFallback(msg.sender, msg.value);
+    }
+
+    //-------------------------------------------------------------------------
+    // set functions
+    //-------------------------------------------------------------------------
+
+    function setPause() external onlyOwner {
+        _pause();
+    }
+
+    function setUnpause() external onlyOwner {
+        _unpause();
+    }
+
+    function setTreasury(address _newTreasury) external onlyOwner whenNotPaused {
+        require(TREASURY != _newTreasury, "Same address! Notice: Must be Multi-sig Wallet!");
+        TREASURY = _newTreasury;
+
+        emit LogSetTreasury(_msgSender(), TREASURY);
+    }
+
+    function setSwapFee(uint256 _newSwapFee) external onlyOwner whenNotPaused {
+        require(SWAP_FEE != _newSwapFee, "Same value!");
+        SWAP_FEE = _newSwapFee;
+
+        emit LogSetSwapFee(_msgSender(), SWAP_FEE);
+    }
+
+    function setSwapFee0x(uint256 _newSwapFee0x) external onlyOwner whenNotPaused {
+        require(SWAP_FEE_0X != _newSwapFee0x, "Same value!");
+        SWAP_FEE_0X = _newSwapFee0x;
+
+        emit LogSetSwapFee0x(_msgSender(), SWAP_FEE_0X);
+    }
+
+    function setDexRouter(address _newRouter) external onlyOwner whenNotPaused {
+        require(address(dexRouter_) != _newRouter, "Same router!");
+        dexRouter_ = IGooseBumpsSwapRouter02(_newRouter);
+        
+        emit LogSetDexRouter(_msgSender(), address(dexRouter_));
+    }
+}
