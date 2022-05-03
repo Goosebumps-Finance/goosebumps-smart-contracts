@@ -11,25 +11,36 @@ import "./DEX/interfaces/IGooseBumpsSwapFactory.sol";
 
 contract SwapOnPolygon is Ownable, Pausable {
     
-    address TREASURY; // Must be multi-sig wallet
+    //--------------------------------------
+    // State variables
+    //--------------------------------------
+
+    address TREASURY;           // Must be multi-sig wallet
+    uint256 SWAP_FEE;           // 
 
     address _dexRouter;
     address _dexFactory;
     address WETH;
-    // address dexRouterAddress = address(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);  //QuickSwap Router
-    // address WETH = address(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270);
-    // address dexFactoryAddress = address(0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32);
+
+    //-------------------------------------------------------------------------
+    // EVENTS
+    //-------------------------------------------------------------------------
 
     event Received(address, uint);
     event Fallback(address, uint);
-    event SetContractStatus(address addr, uint256 pauseValue);
-    event WithdrawAll(address addr, uint256 token, uint256 native);
+    // event SetContractStatus(address addr, uint256 pauseValue);
+    // event WithdrawAll(address addr, uint256 token, uint256 native);
 
-    constructor(address _router) 
-    {          
-        _dexRouter = IGooseBumpsSwapRouter02(_router);   
-        _dexFactory = IGooseBumpsSwapFactory(_dexRouter.factory());
-        TREASURY = address(0xe28f60670529EE8d14277730CDA405e24Ac7251A);
+    //-------------------------------------------------------------------------
+    // CONSTRUCTOR
+    //-------------------------------------------------------------------------
+
+    constructor(address _router, address _treasury) 
+    {
+        _dexRouter = _router;
+        _dexFactory = IGooseBumpsSwapRouter02(_dexRouter).factory();
+        WETH = IGooseBumpsSwapRouter02(_dexRouter).WETH();
+        TREASURY = _treasury;
     }
 
     receive() external payable {
