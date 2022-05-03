@@ -52,6 +52,15 @@ const config: HardhatUserConfig = {
           }
         }
       },
+      {
+        version: "0.8.7",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000
+          }
+        }
+      },
     ]
   },
   networks: {
@@ -63,7 +72,7 @@ const config: HardhatUserConfig = {
     bsc: {
       url: process.env.BSC_URL || "",
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+        process.env.BSC_PRIVATE_KEY !== undefined ? [process.env.BSC_PRIVATE_KEY] : [],
     },
     bsctestnet: {
       url: process.env.BSCTESTNET_URL || "",

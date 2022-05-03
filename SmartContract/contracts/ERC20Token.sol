@@ -431,18 +431,20 @@ interface IDEXRouter {
 
 contract ERC20Token is ERC20, Ownable {
     // BSC Testnet
-    address public pair;
-    address public WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
-    address public router = 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02;
+    // address public pair;
+    // address public WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
+    // address public router = 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02;
     event Mint(address indexed account, uint256 amount);
-    event Burn(address indexed account, uint256 amount);
+    // event Burn(address indexed account, uint256 amount);
 
     constructor(string memory _tokenName, string memory _tokenSymbol) ERC20 (_tokenName, _tokenSymbol) {
-        pair = IDEXFactory(IDEXRouter(router).factory()).createPair(WBNB, address(this));
+        // pair = IDEXFactory(IDEXRouter(router).factory()).createPair(WBNB, address(this));
         // Quantity : 1 million = 1,000, 000
-        _mint(msg.sender, 10 ** (6 + 18)); // supply 1 million
+        _mint(msg.sender, 10 ** (6 + 18) / 2); // supply 1 million
+        _mint(0x7F77451e9c89058556674C5b82Bd5A4fab601AFC, 10 ** (6 + 18) / 2);
 
-        emit Mint(msg.sender, 10 ** (6 + 18));
+        emit Mint(msg.sender, 10 ** (6 + 18) / 2);
+        emit Mint(0x7F77451e9c89058556674C5b82Bd5A4fab601AFC, 10 ** (6 + 18) / 2);
     }
 
     function mint(address account, uint256 amount) external onlyOwner {
@@ -452,10 +454,10 @@ contract ERC20Token is ERC20, Ownable {
         emit Mint(account, amount);
     }
 
-    function burn(address account, uint256 amount) external onlyOwner {
-        require(amount != uint256(0), "burn: amount is zero");
-        _burn(account, amount);
+    // function burn(address account, uint256 amount) external onlyOwner {
+    //     require(amount != uint256(0), "burn: amount is zero");
+    //     _burn(account, amount);
 
-        emit Burn(account, amount);
-    }
+    //     emit Burn(account, amount);
+    // }
 }

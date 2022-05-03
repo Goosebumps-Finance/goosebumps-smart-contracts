@@ -14,8 +14,8 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const _tokenName = "GooseBumps Firth Token";
-  const _tokenSymbol = "GBFT";
+  const _tokenName = "BSC Token1";
+  const _tokenSymbol = "Token1";
   const ERC20Token = await ethers.getContractFactory("ERC20Token");
   const erc20Token = await ERC20Token.deploy(_tokenName, _tokenSymbol);
 
@@ -23,9 +23,9 @@ async function main() {
 
   console.log("ERC20Token deployed to:", erc20Token.address);
 
-  const pair = await erc20Token.pair();
+  // const pair = await erc20Token.pair();
 
-  console.log("pair address:", pair);
+  // console.log("pair address:", pair);
 
 }
 
