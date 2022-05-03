@@ -1,2 +1,9 @@
 # GooseBumps
 GooseBumps
+
+Treasury to test
+	0x821965C1fD8B60D4B33E23C5832E2A7662faAADC
+RouterList
+	BscTestnet
+      "Factory": "0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56",
+      "Router": "0x31cB34991756FD1564b0DEBF2BFF3E522085EC02"
