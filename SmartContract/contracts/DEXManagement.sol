@@ -31,9 +31,7 @@ contract DEXManagement is Ownable, Pausable {
     event LogSetSwapFee(address indexed, uint256);
     event LogSetSwapFee0x(address indexed, uint256);
     event LogSetDexRouter(address indexed, address indexed);
-
-    // event SetContractStatus(address addr, uint256 pauseValue);
-    // event WithdrawAll(address addr, uint256 token, uint256 native);
+    event LogWithdraw(address indexed, uint256, uint256);
 
     //-------------------------------------------------------------------------
     // CONSTRUCTOR
@@ -63,6 +61,32 @@ contract DEXManagement is Ownable, Pausable {
     }
 
     /**
+     * @param   tokenA: tokenA contract address
+     * @param   tokenB: tokenB contract address
+     * @param   _amountIn: amount of input token
+     * @return  uint256: Given an input asset amount, returns the maximum output amount of the other asset.
+     */
+    function getAmountOut(address tokenA, address tokenB, uint256 _amountIn) public view returns(uint256) { 
+        require(_amountIn > 0 , "Invalid amount");
+
+        address[] memory path;
+        if (tokenA == dexRouter_.WETH() || tokenB == dexRouter_.WETH() ) 
+        {
+            path = new address[](2);
+            path[0] = tokenA;
+            path[1] = tokenB;
+        } 
+        else {
+            path = new address[](3);
+            path[0] = tokenA;
+            path[1] = dexRouter_.WETH();
+            path[2] = tokenB;
+        }
+        uint256[] memory amountOutMins = dexRouter_.getAmountsOut(_amountIn, path);
+        return amountOutMins[path.length -1];  
+    }
+
+    /**
      * @param   _tokenA: tokenA contract address
      * @param   _tokenB: tokenB contract address
      * @return  bool: if path is in DEX, return true, else, return false.
@@ -77,13 +101,13 @@ contract DEXManagement is Ownable, Pausable {
     {
         require(_amountIn > 0 , "Invalid amount");
         require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
-        require(IERC20(tokenA).balanceOf(msg.sender) > _amountIn, "Insufficient balance of A token.");
+        require(IERC20(tokenA).balanceOf(_msgSender()) > _amountIn, "Insufficient balance of A token.");
 
         IERC20 _tokenAContract = IERC20(tokenA);        
-        _tokenAContract.transferFrom(msg.sender, address(this), _amountIn);    
-        _tokenAContract.approve(address(_dexRouter), _amountIn);    
+        _tokenAContract.transferFrom(_msgSender(), address(this), _amountIn);    
+        _tokenAContract.approve(address(dexRouter_), _amountIn);    
         
-        uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE) / 10000;   
+        uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE) / 10000;
         uint256 _swapRequestedAmountOutMin  = getAmountOut(tokenA, tokenB, _swapAmountIn) * (100 - _slippage) / 100;     
 
         address[] memory path;
@@ -99,110 +123,84 @@ contract DEXManagement is Ownable, Pausable {
             path[1] = dexRouter_.WETH();
             path[2] = tokenB;
 
-            _dexRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+            dexRouter_.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                 _swapAmountIn,
                 _swapRequestedAmountOutMin,               
                 path,
-                address(msg.sender),
+                _msgSender(),
                 block.timestamp
             );
         }   
         _tokenAContract.transfer(TREASURY, _amountIn - _swapAmountIn);     
     }
 
-    // function swapExactBNBForTokens(address _TokenAddress, uint256 _slippage) public payable{
-    //     require(pauseContract == 0, "Contract Paused");
-    //     require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
+    function swapExactETHForTokens(address token, uint256 _slippage) public payable whenNotPaused{
+        require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
 
-    //     address[] memory path = new address[](2);
-    //     path[0] = WETH;
-    //     path[1] = _TokenAddress;
+        address[] memory path = new address[](2);
+        path[0] = dexRouter_.WETH();
+        path[1] = token;
 
-    //     uint256 _swapAmountIn = msg.value.mul(999).div(1000);   
-    //     uint256 _swapRequestedAmountOutMin  = getAmountOut(WETH, _TokenAddress, _swapAmountIn).mul(100 - _slippage).div(100);    
+        uint256 _swapAmountIn = msg.value * (10000 - SWAP_FEE) / 10000;
+        uint256 _swapRequestedAmountOutMin  = getAmountOut(dexRouter_.WETH(), token, _swapAmountIn) * (100 - _slippage) / 100;    
 
-    //     _dexRouter.swapExactETHForTokensSupportingFeeOnTransferTokens{value: _swapAmountIn}(                
-    //         _swapRequestedAmountOutMin,               
-    //         path,
-    //         address(msg.sender),
-    //         block.timestamp
-    //     );
+        dexRouter_.swapExactETHForTokensSupportingFeeOnTransferTokens{value: _swapAmountIn}(                
+            _swapRequestedAmountOutMin,               
+            path,
+            _msgSender(),
+            block.timestamp
+        );
 
-    //     payable(TREASURY).transfer(msg.value.sub(_swapAmountIn));   
-    // }
+        payable(TREASURY).transfer(msg.value - _swapAmountIn);
+    }
 
-    // function swapExactTokenForBNB(address _TokenAddress, uint256 _amountIn, uint256 _slippage) public {
-    //     require(pauseContract == 0, "Contract Paused");
-    //     require(_amountIn > 0 , "Invalid amount");
-    //     require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
+    function swapExactTokenForETH(address token, uint256 _amountIn, uint256 _slippage) public whenNotPaused{
+        require(_amountIn > 0 , "Invalid amount");
+        require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
 
-    //     address[] memory path = new address[](2);
-    //     path[0] = _TokenAddress;
-    //     path[1] = WETH;
+        address[] memory path = new address[](2);
+        path[0] = token;
+        path[1] = dexRouter_.WETH();
         
-    //     IERC20 _tokenAContract = IERC20(_TokenAddress);        
-    //     _tokenAContract.transferFrom(msg.sender, address(this), _amountIn);    
-    //     _tokenAContract.approve(address(_dexRouter), _amountIn);    
+        IERC20 _tokenAContract = IERC20(token);        
+        _tokenAContract.transferFrom(_msgSender(), address(this), _amountIn);    
+        _tokenAContract.approve(address(dexRouter_), _amountIn);    
 
-    //     uint256 _swapAmountIn = _amountIn.mul(999).div(1000);   
-    //     uint256 _swapRequestedAmountOutMin  = getAmountOut(_TokenAddress, WETH, _swapAmountIn).mul(100 - _slippage).div(100);    
+        uint256 _swapAmountIn = _amountIn * (10000 -  SWAP_FEE) / 10000;   
+        uint256 _swapRequestedAmountOutMin  = getAmountOut(token, dexRouter_.WETH(), _swapAmountIn) * (100 - _slippage) / 100;    
 
-    //     _dexRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(   
-    //         _swapAmountIn,             
-    //         _swapRequestedAmountOutMin,               
-    //         path,
-    //         address(msg.sender),
-    //         block.timestamp
-    //     );
-    //     _tokenAContract.transfer(TREASURY, _amountIn.sub(_swapAmountIn));     
-    // }
-
-    // function getBalanceOfToken(address _tokenAddr) public view returns(uint256){
-    //     return IERC20(_tokenAddr).balanceOf(address(this));
-    // }
-
-    // function getAmountOut(address tokenA, address tokenB, uint256 _amountIn) public view returns(uint256) { 
-    //     require(_amountIn > 0 , "Invalid amount");
-
-    //     address[] memory path;
-    //     if (tokenA == WETH || tokenB == WETH ) 
-    //     {
-    //         path = new address[](2);
-    //         path[0] = tokenA;
-    //         path[1] = tokenB;
-    //     } 
-    //     else {
-    //         path = new address[](3);
-    //         path[0] = tokenA;
-    //         path[1] = WETH;
-    //         path[2] = tokenB;
-    //     }
-    //     uint256[] memory amountOutMins = _dexRouter.getAmountsOut(_amountIn, path);
-    //     return amountOutMins[path.length -1];  
-    // }
+        dexRouter_.swapExactTokensForETHSupportingFeeOnTransferTokens(   
+            _swapAmountIn,             
+            _swapRequestedAmountOutMin,               
+            path,
+            _msgSender(),
+            block.timestamp
+        );
+        _tokenAContract.transfer(TREASURY, _amountIn - _swapAmountIn);     
+    }
     
-    // function withdrawAll(address _addr) external onlyOwner{
-    //     uint256 balance = IERC20(_addr).balanceOf(address(this));
-    //     if(balance > 0) {
-    //         IERC20(_addr).transfer(msg.sender, balance);
-    //     }
-    //     address payable mine = payable(msg.sender);
-    //     if(address(this).balance > 0) {
-    //         mine.transfer(address(this).balance);
-    //     }
-    //     emit WithdrawAll(msg.sender, balance, address(this).balance);
-    // }
+    function withdraw(address token) external onlyOwner{
+        require(IERC20(token).balanceOf(address(this)) > 0 || address(this).balance > 0, "Zero Balance!");
+        uint256 balance = IERC20(token).balanceOf(address(this));
+        if(balance > 0) {
+            IERC20(token).transfer(_msgSender(), balance);
+        }
+        if(address(this).balance > 0) {
+            payable(_msgSender()).transfer(address(this).balance);
+        }
+        emit LogWithdraw(_msgSender(), balance, address(this).balance);
+    }
     
     // function getSelector(string calldata _func) external pure returns (bytes4) {
     //     return bytes4(keccak256(bytes(_func)));
     // }
 
     receive() external payable {
-        emit LogReceived(msg.sender, msg.value);
+        emit LogReceived(_msgSender(), msg.value);
     }
 
     fallback() external payable { 
-        emit LogFallback(msg.sender, msg.value);
+        emit LogFallback(_msgSender(), msg.value);
     }
 
     //-------------------------------------------------------------------------
