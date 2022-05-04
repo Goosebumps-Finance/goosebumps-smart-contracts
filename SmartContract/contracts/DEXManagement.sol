@@ -61,6 +61,17 @@ contract DEXManagement is Ownable, Pausable {
     }
 
     /**
+     * @param   _tokenA: tokenA contract address
+     * @param   _tokenB: tokenB contract address
+     * @return  bool: if path is in DEX, return true, else, return false.
+     */
+     function isPathExists(address _tokenA, address _tokenB) public view returns(bool){        
+        return IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, _tokenB) != address(0) || 
+            (IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, dexRouter_.WETH()) != address(0) && 
+            IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(dexRouter_.WETH(), _tokenB) != address(0));
+    }
+
+    /**
      * @param   tokenA: tokenA contract address
      * @param   tokenB: tokenB contract address
      * @param   _amountIn: amount of input token
@@ -84,17 +95,6 @@ contract DEXManagement is Ownable, Pausable {
         }
         uint256[] memory amountOutMins = dexRouter_.getAmountsOut(_amountIn, path);
         return amountOutMins[path.length -1];  
-    }
-
-    /**
-     * @param   _tokenA: tokenA contract address
-     * @param   _tokenB: tokenB contract address
-     * @return  bool: if path is in DEX, return true, else, return false.
-     */
-    function isPathExists(address _tokenA, address _tokenB) public view returns(bool){        
-        return IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, _tokenB) != address(0) || 
-            (IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, dexRouter_.WETH()) != address(0) && 
-            IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(dexRouter_.WETH(), _tokenB) != address(0));
     }
 
     function swap(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage) public whenNotPaused
@@ -190,10 +190,6 @@ contract DEXManagement is Ownable, Pausable {
         }
         emit LogWithdraw(_msgSender(), balance, address(this).balance);
     }
-    
-    // function getSelector(string calldata _func) external pure returns (bytes4) {
-    //     return bytes4(keccak256(bytes(_func)));
-    // }
 
     receive() external payable {
         emit LogReceived(_msgSender(), msg.value);
