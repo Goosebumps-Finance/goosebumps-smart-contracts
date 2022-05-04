@@ -72,57 +72,57 @@ contract DEXManagement is Ownable, Pausable {
     }
 
     /**
-     * @param   tokenA: tokenA contract address
-     * @param   tokenB: tokenB contract address
+     * @param   tokenIn: tokenIn contract address
+     * @param   tokenOut: tokenOut contract address
      * @param   _amountIn: amount of input token
      * @return  uint256: Given an input asset amount, returns the maximum output amount of the other asset.
      */
-    function getAmountOut(address tokenA, address tokenB, uint256 _amountIn) public view returns(uint256) { 
+    function getAmountOut(address tokenIn, address tokenOut, uint256 _amountIn) public view returns(uint256) { 
         require(_amountIn > 0 , "Invalid amount");
-        require(isPathExists(tokenA, tokenB), "Path does not exist");
+        require(isPathExists(tokenIn, tokenOut), "Path does not exist");
 
         address[] memory path;
-        if (isPairExists(tokenA, tokenB))
+        if (isPairExists(tokenIn, tokenOut))
         {
             path = new address[](2);
-            path[0] = tokenA;
-            path[1] = tokenB;
+            path[0] = tokenIn;
+            path[1] = tokenOut;
         }
         else {
             path = new address[](3);
-            path[0] = tokenA;
+            path[0] = tokenIn;
             path[1] = dexRouter_.WETH();
-            path[2] = tokenB;
+            path[2] = tokenOut;
         }
         uint256[] memory amountOutMaxs = dexRouter_.getAmountsOut(_amountIn, path);
         return amountOutMaxs[path.length -1];  
     }
 
     /**
-     * @param   tokenA: tokenA contract address
-     * @param   tokenB: tokenB contract address
+     * @param   tokenIn: tokenIn contract address
+     * @param   tokenOut: tokenOut contract address
      * @param   _amountOut: amount of output token
      * @return  uint256: Returns the minimum input asset amount required to buy the given output asset amount.
      */
-     function getAmountIn(address tokenA, address tokenB, uint256 _amountOut) public view returns(uint256) { 
+     function getAmountIn(address tokenIn, address tokenOut, uint256 _amountOut) public view returns(uint256) { 
         require(_amountOut > 0 , "Invalid amount");
-        require(isPathExists(tokenA, tokenB), "Path does not exist");
+        require(isPathExists(tokenIn, tokenOut), "Path does not exist");
 
         address[] memory path;
-        if (isPairExists(tokenA, tokenB))
+        if (isPairExists(tokenIn, tokenOut))
         {
             path = new address[](2);
-            path[0] = tokenA;
-            path[1] = tokenB;
+            path[0] = tokenIn;
+            path[1] = tokenOut;
         } 
         else {
             path = new address[](3);
-            path[0] = tokenA;
+            path[0] = tokenIn;
             path[1] = dexRouter_.WETH();
-            path[2] = tokenB;
+            path[2] = tokenOut;
         }
         uint256[] memory amountInMins = dexRouter_.getAmountsIn(_amountOut, path);
-        return amountInMins[path.length -1];
+        return amountInMins[0];
     }
 
     function swap(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage) public whenNotPaused
