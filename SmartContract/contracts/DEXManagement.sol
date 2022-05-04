@@ -15,7 +15,7 @@ contract DEXManagement is Ownable, Pausable {
     // State variables
     //--------------------------------------
 
-    address public TREASURY;                // Must be multi-sig wallet
+    address public TREASURY;                // Must be multi-sig wallet or Treasury contract
     uint256 public SWAP_FEE;                // Fee = SWAP_FEE / 10000
     uint256 public SWAP_FEE_0X;             // Fee = SWAP_FEE_0X / 10000
 
@@ -93,8 +93,34 @@ contract DEXManagement is Ownable, Pausable {
             path[1] = dexRouter_.WETH();
             path[2] = tokenB;
         }
-        uint256[] memory amountOutMins = dexRouter_.getAmountsOut(_amountIn, path);
-        return amountOutMins[path.length -1];  
+        uint256[] memory amountOutMaxs = dexRouter_.getAmountsOut(_amountIn, path);
+        return amountOutMaxs[path.length -1];  
+    }
+
+    /**
+     * @param   tokenA: tokenA contract address
+     * @param   tokenB: tokenB contract address
+     * @param   _amountOut: amount of output token
+     * @return  uint256: Returns the minimum input asset amount required to buy the given output asset amount.
+     */
+     function getAmountIn(address tokenA, address tokenB, uint256 _amountOut) public view returns(uint256) { 
+        require(_amountOut > 0 , "Invalid amount");
+
+        address[] memory path;
+        if (tokenA == dexRouter_.WETH() || tokenB == dexRouter_.WETH() ) 
+        {
+            path = new address[](2);
+            path[0] = tokenA;
+            path[1] = tokenB;
+        } 
+        else {
+            path = new address[](3);
+            path[0] = tokenA;
+            path[1] = dexRouter_.WETH();
+            path[2] = tokenB;
+        }
+        uint256[] memory amountInMins = dexRouter_.getAmountsIn(_amountOut, path);
+        return amountInMins[path.length -1];
     }
 
     function swap(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage) public whenNotPaused
