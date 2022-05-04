@@ -25,10 +25,26 @@ async function main() {
 
   console.log("DEXManagement deployed to:", dexManagement.address);
 
-  console.log("TREASURY address of DEXManagement:", await dexManagement.TREASURY());
-  console.log("SWAP_FEE address of DEXManagement:", await dexManagement.SWAP_FEE());
-  console.log("SWAP_FEE address of DEXManagement:", await dexManagement.SWAP_FEE_0X());
-  console.log("router address of DEXManagement:", await dexManagement.dexRouter_());
+  try {
+    console.log("TREASURY address of DEXManagement:", await dexManagement.TREASURY());
+  } catch (error) {
+    console.log(error)
+  }
+  try {
+    console.log("SWAP_FEE address of DEXManagement:", await dexManagement.SWAP_FEE());
+  } catch (error) {
+    console.log(error)
+  }
+  try {
+    console.log("SWAP_FEE address of DEXManagement:", await dexManagement.SWAP_FEE_0X());
+  } catch (error) {
+    console.log(error)
+  }
+  try {
+    console.log("router address of DEXManagement:", await dexManagement.dexRouter_());
+  } catch (error) {
+    console.log(error)
+  }
 
 }
 
