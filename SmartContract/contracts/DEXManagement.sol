@@ -79,14 +79,15 @@ contract DEXManagement is Ownable, Pausable {
      */
     function getAmountOut(address tokenA, address tokenB, uint256 _amountIn) public view returns(uint256) { 
         require(_amountIn > 0 , "Invalid amount");
+        require(isPathExists(tokenA, tokenB), "Path does not exist");
 
         address[] memory path;
-        if (tokenA == dexRouter_.WETH() || tokenB == dexRouter_.WETH() ) 
+        if (isPairExists(tokenA, tokenB))
         {
             path = new address[](2);
             path[0] = tokenA;
             path[1] = tokenB;
-        } 
+        }
         else {
             path = new address[](3);
             path[0] = tokenA;
@@ -105,9 +106,10 @@ contract DEXManagement is Ownable, Pausable {
      */
      function getAmountIn(address tokenA, address tokenB, uint256 _amountOut) public view returns(uint256) { 
         require(_amountOut > 0 , "Invalid amount");
+        require(isPathExists(tokenA, tokenB), "Path does not exist");
 
         address[] memory path;
-        if (tokenA == dexRouter_.WETH() || tokenB == dexRouter_.WETH() ) 
+        if (isPairExists(tokenA, tokenB))
         {
             path = new address[](2);
             path[0] = tokenA;
