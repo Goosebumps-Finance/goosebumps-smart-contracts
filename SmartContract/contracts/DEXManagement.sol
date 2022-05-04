@@ -125,7 +125,7 @@ contract DEXManagement is Ownable, Pausable {
         return amountInMins[0];
     }
 
-    function swap(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage) public whenNotPaused
+    function swap(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage, uint deadline) public whenNotPaused
     {
         require(_amountIn > 0 , "Invalid amount");
         require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
@@ -156,13 +156,13 @@ contract DEXManagement is Ownable, Pausable {
                 _swapRequestedAmountOutMin,               
                 path,
                 _msgSender(),
-                block.timestamp
+                deadline
             );
         }   
         _tokenAContract.transfer(TREASURY, _amountIn - _swapAmountIn);     
     }
 
-    function swapExactETHForTokens(address token, uint256 _slippage) public payable whenNotPaused{
+    function swapExactETHForTokens(address token, uint256 _slippage, uint deadline) public payable whenNotPaused{
         require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
 
         address[] memory path = new address[](2);
@@ -176,13 +176,13 @@ contract DEXManagement is Ownable, Pausable {
             _swapRequestedAmountOutMin,               
             path,
             _msgSender(),
-            block.timestamp
+            deadline
         );
 
         payable(TREASURY).transfer(msg.value - _swapAmountIn);
     }
 
-    function swapExactTokenForETH(address token, uint256 _amountIn, uint256 _slippage) public whenNotPaused{
+    function swapExactTokenForETH(address token, uint256 _amountIn, uint256 _slippage, uint deadline) public whenNotPaused{
         require(_amountIn > 0 , "Invalid amount");
         require(_slippage >= 0 && _slippage <= 100, "Invalid slippage.");
 
@@ -202,7 +202,7 @@ contract DEXManagement is Ownable, Pausable {
             _swapRequestedAmountOutMin,               
             path,
             _msgSender(),
-            block.timestamp
+            deadline
         );
         _tokenAContract.transfer(TREASURY, _amountIn - _swapAmountIn);     
     }
