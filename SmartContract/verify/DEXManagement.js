@@ -2,7 +2,10 @@
 // const _router = "0x31cB34991756FD1564b0DEBF2BFF3E522085EC02"; // Bsc testnet goosebumps dex
 
 // Ropsten Testnet
-const _router = "0x48D874a757a05eAc5F353BA570266D39698F69F6"; // Ropsten testnet goosebumps dex
+// const _router = "0x48D874a757a05eAc5F353BA570266D39698F69F6"; // Ropsten testnet goosebumps dex
+
+// Polygon Mainnet
+const _router = "0x8E49F3b03D2F482af5c564d933f44De7FDD9C746"; // Polygon mainnet goosebumps dex
 
 const _treasury = "0x821965C1fD8B60D4B33E23C5832E2A7662faAADC";
 const _swapFee = 10; // 0.1%
