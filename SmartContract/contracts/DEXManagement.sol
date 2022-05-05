@@ -125,7 +125,7 @@ contract DEXManagement is Ownable, Pausable {
         return amountInMins[0];
     }
 
-    function swap(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage, uint deadline) public whenNotPaused
+    function swapExactTokensForTokens(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage, uint deadline) public whenNotPaused
     {
         require(_amountIn > 0 , "Invalid amount");
         require(_slippage >= 0 && _slippage <= 10000, "Invalid slippage.");
@@ -139,7 +139,7 @@ contract DEXManagement is Ownable, Pausable {
         uint256 _swapRequestedAmountOutMin  = getAmountOut(tokenA, tokenB, _swapAmountIn) * (10000 - _slippage) / 10000;     
 
         address[] memory path;
-        if (tokenA == dexRouter_.WETH() || tokenB == dexRouter_.WETH() ) 
+        if (isPairExists(tokenA, tokenB)) 
         {
             path = new address[](2);
             path[0] = tokenA;
