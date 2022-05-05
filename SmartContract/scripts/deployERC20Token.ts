@@ -14,8 +14,8 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const _tokenName = "BSC Token1";
-  const _tokenSymbol = "Token1";
+  const _tokenName = "Polygon Token2";
+  const _tokenSymbol = "Token2";
   const ERC20Token = await ethers.getContractFactory("ERC20Token");
   const erc20Token = await ERC20Token.deploy(_tokenName, _tokenSymbol);
 

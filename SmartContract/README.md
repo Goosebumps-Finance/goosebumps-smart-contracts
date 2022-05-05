@@ -50,6 +50,7 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 | Multi-Sig Wallet or Contract | Contract Address |
 |-------------------|------------------|
 | Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
+| _feeToSetter | 0x36285fDa2bE8a96fEb1d763CA77531D696Ae3B0b |
 
 | Contract Name | Contract Address |
 |-------------------|------------------|
@@ -70,17 +71,38 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 | Multi-Sig Wallet or Contract | Contract Address |
 |-------------------|------------------|
 | Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
+| _feeToSetter | 0x36285fDa2bE8a96fEb1d763CA77531D696Ae3B0b |
 
 | Contract Name | Contract Address |
 |-------------------|------------------|
 | GooseBumpsSwapRouter02 | 0x48D874a757a05eAc5F353BA570266D39698F69F6 |
 | GooseBumpsSwapFactory | 0x354924E426FA21EbEc142BE760753D4407b8a59E |
-| WBNB | 0xc778417E063141139Fce010982780140Aa0cD5Ab |
+| WETH | 0xc778417E063141139Fce010982780140Aa0cD5Ab |
 | DEXManagement | 0xa9B6a314abF836A1f05ce40Bd857fd89356083b5 |
-
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
 |-------------------|-------------------|------------------|------------------|
 | BSC Token0 | Token0 | 0x88fc3DcA85faBCa6Df62dDa115c3e529E19c369b |  |
 | BSC Token1 | Token1 | 0x94595bFF70614B0308C390225bB2Cc622F6b6721 |  |
 | BSC Token2 | Token2 | 0x13B1D5B3F93382c0AcF8026b12555b427DA2Eb7e |  |
+
+## Ploygon Mainnet
+
+| Multi-Sig Wallet or Contract | Contract Address |
+|-------------------|------------------|
+| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
+| _feeToSetter | 0x25bB177C3fE2f6a9B599616aCcD1Ed6f1765F2EB |
+
+| Contract Name | Contract Address |
+|-------------------|------------------|
+| GooseBumpsSwapRouter02 | 0x8E49F3b03D2F482af5c564d933f44De7FDD9C746 |
+| GooseBumpsSwapFactory | 0xa2A6A700452e4590c175C69C84c09655AbBC942F |
+| WMATIC | 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 |
+| DEXManagement | 0x1264a6f883EBb63Fdc83e45aB947dE134113a1E7 |
+
+| Token Name | Token Symbol | Contract Address | Pair Address |
+|-------------------|-------------------|------------------|------------------|
+| Polygon Token0 | Token0 | 0x5FbF55B17e7799935ae499FB9aeadB677CA88566 |  |
+| Polygon Token1 | Token1 | 0x4eda999a84Af9303D3298f0e34D1d509F6999DDF |  |
+| Polygon Token1 | Token1 | 0x56D018869C5Ba97E34975484c904B32799111D87 |  |
+| Polygon Token2 | Token2 | 0x0e5c05643215a50CA58e4774Ba3C27CEfe7310EF |  |
