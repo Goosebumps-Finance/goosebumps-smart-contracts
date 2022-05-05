@@ -47,7 +47,7 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 ## BSC Testnet
 
-| Multi-Sig Wallet | Contract Address |
+| Multi-Sig Wallet or Contract | Contract Address |
 |-------------------|------------------|
 | Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 
@@ -56,6 +56,7 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 | GooseBumpsSwapRouter02 | 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02 |
 | GooseBumpsSwapFactory | 0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56 |
 | WBNB | 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd |
+| DEXManagement | 0xFD30B07eE421B307bdaCaf8ffE7329bF684227B2 |
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
 |-------------------|-------------------|------------------|------------------|
@@ -63,3 +64,23 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 | GooseBumps Second Token | GBST | 0xA490CfCE72c5d7344A177c6fCAdfBf0991816e93 |0xE76eE04D2A58Aeaff36763DD82E778d860501751 |
 | GooseBumps Third Token | GBTT | 0x2FC145e7A2e6E1E83C55B7e73422072B70C73A77 | 0x4365E31B76196D23b143178A5f845D47c196766b |
 | GooseBumps Firth Token | GBFT | 0x238CD26cccc1C714201Fc8bf49d453a39f494209 | 0xdeEeB6041bD4E3922E18f1F25771C71d7F64579e |
+
+## Ropsten Testnet
+
+| Multi-Sig Wallet or Contract | Contract Address |
+|-------------------|------------------|
+| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
+
+| Contract Name | Contract Address |
+|-------------------|------------------|
+| GooseBumpsSwapRouter02 | 0x48D874a757a05eAc5F353BA570266D39698F69F6 |
+| GooseBumpsSwapFactory | 0x354924E426FA21EbEc142BE760753D4407b8a59E |
+| WBNB | 0xc778417E063141139Fce010982780140Aa0cD5Ab |
+| DEXManagement | 0xa9B6a314abF836A1f05ce40Bd857fd89356083b5 |
+
+
+| Token Name | Token Symbol | Contract Address | Pair Address |
+|-------------------|-------------------|------------------|------------------|
+| BSC Token0 | Token0 | 0x88fc3DcA85faBCa6Df62dDa115c3e529E19c369b |  |
+| BSC Token1 | Token1 | 0x94595bFF70614B0308C390225bB2Cc622F6b6721 |  |
+| BSC Token2 | Token2 | 0x13B1D5B3F93382c0AcF8026b12555b427DA2Eb7e |  |
