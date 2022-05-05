@@ -190,7 +190,7 @@ contract DEXManagement is Ownable, Pausable {
         path[0] = token;
         path[1] = dexRouter_.WETH();
         
-        IERC20 _tokenAContract = IERC20(token);        
+        IERC20 _tokenAContract = IERC20(token);
         _tokenAContract.transferFrom(_msgSender(), address(this), _amountIn);    
         _tokenAContract.approve(address(dexRouter_), _amountIn);    
 
