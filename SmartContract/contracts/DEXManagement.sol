@@ -32,6 +32,7 @@ contract DEXManagement is Ownable, Pausable {
     event LogSetSwapFee0x(address indexed, uint256);
     event LogSetDexRouter(address indexed, address indexed);
     event LogWithdraw(address indexed, uint256, uint256);
+    event LogSwapExactTokensForTokensOn0x(address indexed, address indexed, uint256, uint256);
 
     //-------------------------------------------------------------------------
     // CONSTRUCTOR
@@ -104,7 +105,7 @@ contract DEXManagement is Ownable, Pausable {
      * @param   _amountOut: amount of output token
      * @return  uint256: Returns the minimum input asset amount required to buy the given output asset amount.
      */
-     function getAmountIn(address tokenIn, address tokenOut, uint256 _amountOut) public view returns(uint256) { 
+     function getAmountIn(address tokenIn, address tokenOut, uint256 _amountOut) external view returns(uint256) { 
         require(_amountOut > 0 , "Invalid amount");
         require(isPathExists(tokenIn, tokenOut), "Invalid path");
 
@@ -125,7 +126,7 @@ contract DEXManagement is Ownable, Pausable {
         return amountInMins[0];
     }
 
-    function swapExactTokensForTokens(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage, uint deadline) public whenNotPaused
+    function swapExactTokensForTokens(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage, uint deadline) external whenNotPaused
     {
         require(isPathExists(tokenA, tokenB), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
@@ -162,7 +163,50 @@ contract DEXManagement is Ownable, Pausable {
         IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
     }
 
-    function swapExactETHForTokens(address token, uint256 _slippage, uint deadline) public payable whenNotPaused{
+    /**
+     * @param   tokenA: InputToken Address to swap on 0x, The `sellTokenAddress` field from the API response
+     * @param   tokenB: OutputToken Address to swap on 0x, The `buyTokenAddress` field from the API response
+     * @param   _amountIn: Amount of InputToken to swap on 0x, The `sellAmount` field from the API response
+     * @param   spender: Spender to approve the amount of InputToken, The `allowanceTarget` field from the API response
+     * @param   swapTarget: SwapTarget contract address, The `to` field from the API response
+     * @param   swapCallData: CallData, The `data` field from the API response
+     * @param   deadline: Deadline, The `data` field from the API response
+     * @notice  swap ERC20 token to ERC20 token by using 0x protocol
+     */
+    function swapExactTokensForTokensOn0x(
+        address tokenA,
+        address tokenB,
+        uint256 _amountIn,
+        address spender,
+        address payable swapTarget,
+        bytes calldata swapCallData,
+        uint deadline
+    )
+        external whenNotPaused
+    {
+        require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
+        require(_amountIn > 0 , "Invalid amount");
+
+        IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn);
+        uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
+        
+        require(IERC20(tokenA).approve(spender, _swapAmountIn));
+        
+        uint256 boughtAmount = IERC20(tokenB).balanceOf(address(this));
+
+        (bool success,) = swapTarget.call(swapCallData);
+        require(success, 'SWAP_CALL_FAILED');
+
+        boughtAmount = IERC20(tokenB).balanceOf(address(this)) - boughtAmount;
+
+        IERC20(tokenB).transfer(_msgSender(), boughtAmount);
+
+        IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
+
+        emit LogSwapExactTokensForTokensOn0x(tokenA, tokenB, _amountIn, boughtAmount);
+    }
+
+    function swapExactETHForTokens(address token, uint256 _slippage, uint deadline) external payable whenNotPaused{
         require(isPathExists(token, dexRouter_.WETH()), "Invalid path");
         require(_slippage >= 0 && _slippage <= 10000, "Invalid slippage");
 
@@ -183,7 +227,7 @@ contract DEXManagement is Ownable, Pausable {
         payable(TREASURY).transfer(msg.value - _swapAmountIn);
     }
 
-    function swapExactTokenForETH(address token, uint256 _amountIn, uint256 _slippage, uint deadline) public whenNotPaused{
+    function swapExactTokenForETH(address token, uint256 _amountIn, uint256 _slippage, uint deadline) external whenNotPaused{
         require(isPathExists(token, dexRouter_.WETH()), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
         require(_slippage >= 0 && _slippage <= 10000, "Invalid slippage");
