@@ -49,14 +49,14 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 | Multi-Sig Wallet or Contract | Contract Address |
 |-------------------|------------------|
-| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 | _feeToSetter | 0x36285fDa2bE8a96fEb1d763CA77531D696Ae3B0b |
+| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 
 | Contract Name | Contract Address |
 |-------------------|------------------|
-| GooseBumpsSwapRouter02 | 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02 |
-| GooseBumpsSwapFactory | 0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56 |
 | WBNB | 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd |
+| GooseBumpsSwapFactory | 0x75C821CCD003CC9E9Ea06008fAf9Ab8189B1EC56 |
+| GooseBumpsSwapRouter02 | 0x31cB34991756FD1564b0DEBF2BFF3E522085EC02 |
 | DEXManagement | 0xFD30B07eE421B307bdaCaf8ffE7329bF684227B2 |
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
@@ -70,14 +70,14 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 | Multi-Sig Wallet or Contract | Contract Address |
 |-------------------|------------------|
-| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 | _feeToSetter | 0x36285fDa2bE8a96fEb1d763CA77531D696Ae3B0b |
+| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 
 | Contract Name | Contract Address |
 |-------------------|------------------|
-| GooseBumpsSwapRouter02 | 0x48D874a757a05eAc5F353BA570266D39698F69F6 |
-| GooseBumpsSwapFactory | 0x354924E426FA21EbEc142BE760753D4407b8a59E |
 | WETH | 0xc778417E063141139Fce010982780140Aa0cD5Ab |
+| GooseBumpsSwapFactory | 0x354924E426FA21EbEc142BE760753D4407b8a59E |
+| GooseBumpsSwapRouter02 | 0x48D874a757a05eAc5F353BA570266D39698F69F6 |
 | DEXManagement | 0xa9B6a314abF836A1f05ce40Bd857fd89356083b5 |
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
@@ -90,14 +90,14 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 
 | Multi-Sig Wallet or Contract | Contract Address |
 |-------------------|------------------|
-| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 | _feeToSetter | 0x25bB177C3fE2f6a9B599616aCcD1Ed6f1765F2EB |
+| Treasury | 0x821965C1fD8B60D4B33E23C5832E2A7662faAADC |
 
 | Contract Name | Contract Address |
 |-------------------|------------------|
-| GooseBumpsSwapRouter02 | 0x8E49F3b03D2F482af5c564d933f44De7FDD9C746 |
-| GooseBumpsSwapFactory | 0xa2A6A700452e4590c175C69C84c09655AbBC942F |
 | WMATIC | 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 |
+| GooseBumpsSwapFactory | 0xa2A6A700452e4590c175C69C84c09655AbBC942F |
+| GooseBumpsSwapRouter02 | 0x8E49F3b03D2F482af5c564d933f44De7FDD9C746 |
 | DEXManagement | 0x1264a6f883EBb63Fdc83e45aB947dE134113a1E7 |
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
