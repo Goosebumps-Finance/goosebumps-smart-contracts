@@ -68,7 +68,7 @@ contract DEXManagement is Ownable, Pausable {
      * @param   _tokenB: tokenB contract address
      * @return  bool: if path is in DEX, return true, else, return false.
      */
-     function isPathExists(address _tokenA, address _tokenB) public view returns(bool){        
+    function isPathExists(address _tokenA, address _tokenB) public view returns(bool){        
         return IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, _tokenB) != address(0) || 
             (IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(_tokenA, dexRouter_.WETH()) != address(0) && 
             IGooseBumpsSwapFactory(dexRouter_.factory()).getPair(dexRouter_.WETH(), _tokenB) != address(0));
@@ -97,7 +97,7 @@ contract DEXManagement is Ownable, Pausable {
             path[1] = dexRouter_.WETH();
             path[2] = tokenOut;
         }
-        uint256[] memory amountOutMaxs = dexRouter_.getAmountsOut(_amountIn, path);
+        uint256[] memory amountOutMaxs = dexRouter_.getAmountsOut(_amountIn * (10000 - SWAP_FEE) / 10000, path);
         return amountOutMaxs[path.length - 1];  
     }
 
@@ -107,7 +107,7 @@ contract DEXManagement is Ownable, Pausable {
      * @param   _amountOut: amount of output token
      * @return  uint256: Returns the minimum input asset amount required to buy the given output asset amount.
      */
-     function getAmountIn(address tokenIn, address tokenOut, uint256 _amountOut) external view returns(uint256) { 
+    function getAmountIn(address tokenIn, address tokenOut, uint256 _amountOut) external view returns(uint256) { 
         require(_amountOut > 0 , "Invalid amount");
         require(isPathExists(tokenIn, tokenOut), "Invalid path");
 
@@ -125,19 +125,33 @@ contract DEXManagement is Ownable, Pausable {
             path[2] = tokenOut;
         }
         uint256[] memory amountInMins = dexRouter_.getAmountsIn(_amountOut, path);
-        return amountInMins[0];
+        return amountInMins[0] * 10000 / (10000 - SWAP_FEE);
     }
 
-    function swapExactTokensForTokens(address tokenA, address tokenB, uint256 _amountIn, uint256 _slippage, uint deadline) external whenNotPaused
+    /**
+     * @param   tokenA: InputToken Address to swap on GooseBumps
+     * @param   tokenB: OutputToken Address to swap on GooseBumps
+     * @param   _amountIn: Amount of InputToken to swap on GooseBumps
+     * @param   _amountOutMin: The minimum amount of output tokens that must be received for the transaction not to revert.
+     * @param   to: Recipient of the output tokens.
+     * @param   deadline: Deadline, Timestamp after which the transaction will revert.
+     * @notice  Swap ERC20 token to ERC20 token on GooseBumps
+     */
+    function swapExactTokensForTokens(
+        address tokenA, 
+        address tokenB, 
+        uint256 _amountIn, 
+        uint256 _amountOutMin, 
+        address to, 
+        uint deadline
+    ) external whenNotPaused
     {
         require(isPathExists(tokenA, tokenB), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
-        require(_slippage >= 0 && _slippage <= 10000, "Invalid slippage");
 
         IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn);
 
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE) / 10000;
-        uint256 _swapAmountOutMin  = getAmountOut(tokenA, tokenB, _swapAmountIn) * (10000 - _slippage) / 10000;
         
         IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn);  
 
@@ -157,12 +171,13 @@ contract DEXManagement is Ownable, Pausable {
 
         dexRouter_.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             _swapAmountIn,
-            _swapAmountOutMin,  
+            _amountOutMin,  
             path,
-            _msgSender(),
+            to,
             deadline
         );
         IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
+
     }
 
     /**
@@ -172,8 +187,9 @@ contract DEXManagement is Ownable, Pausable {
      * @param   spender: Spender to approve the amount of InputToken, The `allowanceTarget` field from the API response
      * @param   swapTarget: SwapTarget contract address, The `to` field from the API response
      * @param   swapCallData: CallData, The `data` field from the API response
-     * @param   deadline: Deadline, The `data` field from the API response
-     * @notice  swap ERC20 token to ERC20 token by using 0x protocol
+     * @param   to: Recipient of the output tokens.
+     * @param   deadline: Deadline, Timestamp after which the transaction will revert.
+     * @notice  Swap ERC20 token to ERC20 token by using 0x protocol
      */
     function swapExactTokensForTokensOn0x(
         address tokenA,
@@ -182,6 +198,7 @@ contract DEXManagement is Ownable, Pausable {
         address spender,
         address payable swapTarget,
         bytes calldata swapCallData,
+        address to,
         uint deadline
     ) external whenNotPaused {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
@@ -199,16 +216,27 @@ contract DEXManagement is Ownable, Pausable {
 
         boughtAmount = IERC20(tokenB).balanceOf(address(this)) - boughtAmount;
 
-        IERC20(tokenB).transfer(_msgSender(), boughtAmount);
+        IERC20(tokenB).transfer(to, boughtAmount);
 
         IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
 
         emit LogSwapExactTokensForTokensOn0x(tokenA, tokenB, _amountIn, boughtAmount);
     }
 
-    function swapExactETHForTokens(address token, uint256 _slippage, uint deadline) external payable whenNotPaused {
+    /**
+     * @param   token: OutputToken Address to swap on GooseBumps
+     * @param   _amountOutMin: The minimum amount of output tokens that must be received for the transaction not to revert.
+     * @param   to: Recipient of the output tokens.
+     * @param   deadline: Deadline, Timestamp after which the transaction will revert.
+     * @notice  Swap ETH to ERC20 token on GooseBumps
+     */
+    function swapExactETHForTokens(
+        address token, 
+        uint256 _amountOutMin, 
+        address to, 
+        uint deadline
+    ) external payable whenNotPaused {
         require(isPathExists(token, dexRouter_.WETH()), "Invalid path");
-        require(_slippage >= 0 && _slippage <= 10000, "Invalid slippage");
         require(msg.value > 0 , "Invalid amount");
 
         address[] memory path = new address[](2);
@@ -216,12 +244,11 @@ contract DEXManagement is Ownable, Pausable {
         path[1] = token;
 
         uint256 _swapAmountIn = msg.value * (10000 - SWAP_FEE) / 10000;
-        uint256 _swapAmountOutMin  = getAmountOut(dexRouter_.WETH(), token, _swapAmountIn) * (10000 - _slippage) / 10000;
 
         dexRouter_.swapExactETHForTokensSupportingFeeOnTransferTokens{value: _swapAmountIn}(                
-            _swapAmountOutMin,
+            _amountOutMin,
             path,
-            _msgSender(),
+            to,
             deadline
         );
 
@@ -232,13 +259,15 @@ contract DEXManagement is Ownable, Pausable {
      * @param   token: OutputToken Address to swap on 0x, The `buyTokenAddress` field from the API response
      * @param   swapTarget: SwapTarget contract address, The `to` field from the API response
      * @param   swapCallData: CallData, The `data` field from the API response
-     * @param   deadline: Deadline, The `data` field from the API response
-     * @notice  swap ETH to ERC20 token by using 0x protocol
+     * @param   to: Recipient of the output tokens.
+     * @param   deadline: Deadline, Timestamp after which the transaction will revert.
+     * @notice  Swap ETH to ERC20 token by using 0x protocol
      */
     function swapExactETHForTokensOn0x(
         address token, 
         address payable swapTarget, 
         bytes calldata swapCallData, 
+        address to,
         uint deadline
     ) external payable whenNotPaused {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
@@ -253,17 +282,30 @@ contract DEXManagement is Ownable, Pausable {
 
         boughtAmount = IERC20(token).balanceOf(address(this)) - boughtAmount;
 
-        IERC20(token).transfer(_msgSender(), boughtAmount);
+        IERC20(token).transfer(to, boughtAmount);
 
         payable(TREASURY).transfer(msg.value - _swapAmountIn);
 
         emit LogSwapExactETHForTokensOn0x(token, msg.value, boughtAmount);
     }
 
-    function swapExactTokenForETH(address token, uint256 _amountIn, uint256 _slippage, uint deadline) external whenNotPaused{
+    /**
+     * @param   token: InputToken Address to swap on GooseBumps
+     * @param   _amountIn: Amount of InputToken to swap on GooseBumps
+     * @param   _amountOutMin: The minimum amount of output tokens that must be received for the transaction not to revert.
+     * @param   to: Recipient of the output tokens.
+     * @param   deadline: Deadline, Timestamp after which the transaction will revert.
+     * @notice  Swap ERC20 token to ETH on GooseBumps
+     */
+    function swapExactTokenForETH(
+        address token, 
+        uint256 _amountIn, 
+        uint256 _amountOutMin, 
+        address to, 
+        uint deadline
+    ) external whenNotPaused {
         require(isPathExists(token, dexRouter_.WETH()), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
-        require(_slippage >= 0 && _slippage <= 10000, "Invalid slippage");
 
         address[] memory path = new address[](2);
         path[0] = token;
@@ -271,18 +313,17 @@ contract DEXManagement is Ownable, Pausable {
         
         IERC20(token).transferFrom(_msgSender(), address(this), _amountIn);    
         uint256 _swapAmountIn = _amountIn * (10000 -  SWAP_FEE) / 10000;
-        uint256 _swapAmountOutMin  = getAmountOut(token, dexRouter_.WETH(), _swapAmountIn) * (10000 - _slippage) / 10000;
         
         IERC20(token).approve(address(dexRouter_), _swapAmountIn);    
 
         dexRouter_.swapExactTokensForETHSupportingFeeOnTransferTokens(   
             _swapAmountIn,         
-            _swapAmountOutMin,         
+            _amountOutMin,         
             path,
-            _msgSender(),
+            to,
             deadline
         );
-        IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);     
+        IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);
     }
 
     /**
@@ -291,8 +332,9 @@ contract DEXManagement is Ownable, Pausable {
      * @param   spender: Spender to approve the amount of InputToken, The `allowanceTarget` field from the API response
      * @param   swapTarget: SwapTarget contract address, The `to` field from the API response
      * @param   swapCallData: CallData, The `data` field from the API response
-     * @param   deadline: Deadline, The `data` field from the API response
-     * @notice  swap ERC20 token to ETH by using 0x protocol
+     * @param   to: Recipient of the output tokens.
+     * @param   deadline: Deadline, Timestamp after which the transaction will revert.
+     * @notice  Swap ERC20 token to ETH by using 0x protocol
      */
     function swapExactTokenForETHOn0x(
         address token,
@@ -300,6 +342,7 @@ contract DEXManagement is Ownable, Pausable {
         address spender,
         address payable swapTarget,
         bytes calldata swapCallData,
+        address to,
         uint deadline
     ) external whenNotPaused {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
@@ -317,7 +360,7 @@ contract DEXManagement is Ownable, Pausable {
 
         boughtAmount = address(this).balance - boughtAmount;
 
-        payable(_msgSender()).transfer(boughtAmount);
+        payable(to).transfer(boughtAmount);
 
         IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);
 
@@ -334,6 +377,7 @@ contract DEXManagement is Ownable, Pausable {
         if(address(this).balance > 0) {
             payable(_msgSender()).transfer(address(this).balance);
         }
+        
         emit LogWithdraw(_msgSender(), balance, address(this).balance);
     }
 
