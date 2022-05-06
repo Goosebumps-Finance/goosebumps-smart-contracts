@@ -32,6 +32,9 @@ contract DEXManagement is Ownable, Pausable {
     event LogSetSwapFee0x(address indexed, uint256);
     event LogSetDexRouter(address indexed, address indexed);
     event LogWithdraw(address indexed, uint256, uint256);
+    event LogSwapExactTokensForTokens(address indexed, address indexed, uint256, uint256);
+    event LogSwapExactETHForTokens(address indexed, uint256, uint256);
+    event LogSwapExactTokenForETH(address indexed, uint256, uint256);
     event LogSwapExactTokensForTokensOn0x(address indexed, address indexed, uint256, uint256);
     event LogSwapExactETHForTokensOn0x(address indexed, uint256, uint256);
     event LogSwapExactTokenForETHOn0x(address indexed, uint256, uint256);
@@ -168,7 +171,8 @@ contract DEXManagement is Ownable, Pausable {
             path[1] = dexRouter_.WETH();
             path[2] = tokenB;
         }
-
+        
+        uint256 boughtAmount = IERC20(tokenB).balanceOf(to);
         dexRouter_.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             _swapAmountIn,
             _amountOutMin,  
@@ -176,8 +180,11 @@ contract DEXManagement is Ownable, Pausable {
             to,
             deadline
         );
+        boughtAmount = IERC20(tokenB).balanceOf(to) - boughtAmount;
+
         IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
 
+        emit LogSwapExactTokensForTokens(tokenA, tokenB, _amountIn, boughtAmount)
     }
 
     /**
@@ -245,14 +252,18 @@ contract DEXManagement is Ownable, Pausable {
 
         uint256 _swapAmountIn = msg.value * (10000 - SWAP_FEE) / 10000;
 
+        uint256 boughtAmount = IERC20(token).balanceOf(to);
         dexRouter_.swapExactETHForTokensSupportingFeeOnTransferTokens{value: _swapAmountIn}(                
             _amountOutMin,
             path,
             to,
             deadline
         );
+        boughtAmount = IERC20(token).balanceOf(to) - boughtAmount;
 
         payable(TREASURY).transfer(msg.value - _swapAmountIn);
+
+        emit LogSwapExactETHForTokens(token, msg.value, boughtAmount)
     }
 
     /**
@@ -316,6 +327,7 @@ contract DEXManagement is Ownable, Pausable {
         
         IERC20(token).approve(address(dexRouter_), _swapAmountIn);    
 
+        uint256 boughtAmount = address(to).balance;
         dexRouter_.swapExactTokensForETHSupportingFeeOnTransferTokens(   
             _swapAmountIn,         
             _amountOutMin,         
@@ -323,7 +335,11 @@ contract DEXManagement is Ownable, Pausable {
             to,
             deadline
         );
+        boughtAmount = address(to).balance - boughtAmount;
+
         IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);
+
+        emit LogSwapExactTokenForETH(token, _amountIn, boughtAmount)
     }
 
     /**
