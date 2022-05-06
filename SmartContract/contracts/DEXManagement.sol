@@ -51,6 +51,7 @@ contract DEXManagement is Ownable, Pausable {
      */
     constructor(address _router, address _treasury, uint256 _swapFee, uint256 _swapFee0x ) 
     {
+        require(_treasury != address(0), "Zero address");
         dexRouter_ = IGooseBumpsSwapRouter02(_router);
         TREASURY = _treasury;
         SWAP_FEE = _swapFee;
@@ -83,7 +84,7 @@ contract DEXManagement is Ownable, Pausable {
      * @param   _amountIn: amount of input token
      * @return  uint256: Given an input asset amount, returns the maximum output amount of the other asset.
      */
-    function getAmountOut(address tokenIn, address tokenOut, uint256 _amountIn) public view returns(uint256) { 
+    function getAmountOut(address tokenIn, address tokenOut, uint256 _amountIn) external view returns(uint256) { 
         require(_amountIn > 0 , "Invalid amount");
         require(isPathExists(tokenIn, tokenOut), "Invalid path");
 
@@ -152,11 +153,11 @@ contract DEXManagement is Ownable, Pausable {
         require(isPathExists(tokenA, tokenB), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
 
-        IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn);
+        require(IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
 
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE) / 10000;
         
-        IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn);
+        require(IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn));
 
         address[] memory path;
         if (isPairExists(tokenA, tokenB)) 
@@ -182,7 +183,7 @@ contract DEXManagement is Ownable, Pausable {
         );
         boughtAmount = IERC20(tokenB).balanceOf(to) - boughtAmount;
 
-        IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
+        require(IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn), "Faild Transfer");
 
         emit LogSwapExactTokensForTokens(tokenA, tokenB, _amountIn, boughtAmount);
     }
@@ -210,11 +211,12 @@ contract DEXManagement is Ownable, Pausable {
     ) external whenNotPaused {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
         require(_amountIn > 0 , "Invalid amount");
+        require(address(swapTarget) != address(0), "Zero address");
 
-        IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn);
+        require(IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
         
-        IERC20(tokenA).approve(spender, _swapAmountIn);
+        require(IERC20(tokenA).approve(spender, _swapAmountIn));
         
         uint256 boughtAmount = IERC20(tokenB).balanceOf(address(this));
 
@@ -223,9 +225,9 @@ contract DEXManagement is Ownable, Pausable {
 
         boughtAmount = IERC20(tokenB).balanceOf(address(this)) - boughtAmount;
 
-        IERC20(tokenB).transfer(to, boughtAmount);
+        require(IERC20(tokenB).transfer(to, boughtAmount), "Faild Transfer");
 
-        IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
+        require(IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn), "Faild Transfer");
 
         emit LogSwapExactTokensForTokensOn0x(tokenA, tokenB, _amountIn, boughtAmount);
     }
@@ -283,6 +285,7 @@ contract DEXManagement is Ownable, Pausable {
     ) external payable whenNotPaused {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
         require(msg.value > 0 , "Invalid amount");
+        require(address(swapTarget) != address(0), "Zero address");
 
         uint256 _swapAmountIn = msg.value * (10000 - SWAP_FEE_0X) / 10000;
         
@@ -293,7 +296,7 @@ contract DEXManagement is Ownable, Pausable {
 
         boughtAmount = IERC20(token).balanceOf(address(this)) - boughtAmount;
 
-        IERC20(token).transfer(to, boughtAmount);
+        require(IERC20(token).transfer(to, boughtAmount), "Faild Transfer");
 
         payable(TREASURY).transfer(msg.value - _swapAmountIn);
 
@@ -322,10 +325,10 @@ contract DEXManagement is Ownable, Pausable {
         path[0] = token;
         path[1] = dexRouter_.WETH();
         
-        IERC20(token).transferFrom(_msgSender(), address(this), _amountIn);    
+        require(IERC20(token).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
         uint256 _swapAmountIn = _amountIn * (10000 -  SWAP_FEE) / 10000;
         
-        IERC20(token).approve(address(dexRouter_), _swapAmountIn);
+        require(IERC20(token).approve(address(dexRouter_), _swapAmountIn));
 
         uint256 boughtAmount = address(to).balance;
         dexRouter_.swapExactTokensForETHSupportingFeeOnTransferTokens(   
@@ -337,7 +340,7 @@ contract DEXManagement is Ownable, Pausable {
         );
         boughtAmount = address(to).balance - boughtAmount;
 
-        IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);
+        require(IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn), "Faild Transfer");
 
         emit LogSwapExactTokenForETH(token, _amountIn, boughtAmount);
     }
@@ -363,11 +366,13 @@ contract DEXManagement is Ownable, Pausable {
     ) external whenNotPaused {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
         require(_amountIn > 0 , "Invalid amount");
+        require(address(swapTarget) != address(0), "Zero address");
+        require(to != address(0), "'to' is Zero address");
 
-        IERC20(token).transferFrom(_msgSender(), address(this), _amountIn);
+        require(IERC20(token).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
         
-        IERC20(token).approve(spender, _swapAmountIn);
+        require(IERC20(token).approve(spender, _swapAmountIn));
         
         uint256 boughtAmount = address(this).balance;
 
@@ -378,20 +383,21 @@ contract DEXManagement is Ownable, Pausable {
 
         payable(to).transfer(boughtAmount);
 
-        IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);
+        require(IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn), "Faild Transfer");
 
         emit LogSwapExactTokenForETHOn0x(token, _amountIn, boughtAmount);
     }
     
     function withdraw(address token) external onlyOwner{
         require(IERC20(token).balanceOf(address(this)) > 0 || address(this).balance > 0, "Zero Balance!");
-        uint256 balance = IERC20(token).balanceOf(address(this));
-        if(balance > 0) {
-            IERC20(token).transfer(_msgSender(), balance);
-        }
 
         if(address(this).balance > 0) {
             payable(_msgSender()).transfer(address(this).balance);
+        }
+        
+        uint256 balance = IERC20(token).balanceOf(address(this));
+        if(balance > 0) {
+            require(IERC20(token).transfer(_msgSender(), balance), "Faild Transfer");
         }
         
         emit LogWithdraw(_msgSender(), balance, address(this).balance);
