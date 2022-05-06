@@ -6,10 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./DEX/interfaces/IGooseBumpsSwapRouter02.sol";
 import "./DEX/interfaces/IGooseBumpsSwapFactory.sol";
 
-contract DEXManagement is Ownable, Pausable {
+contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
     
     //--------------------------------------
     // State variables
@@ -148,8 +149,7 @@ contract DEXManagement is Ownable, Pausable {
         uint256 _amountOutMin, 
         address to, 
         uint deadline
-    ) external whenNotPaused
-    {
+    ) external whenNotPaused nonReentrant {
         require(isPathExists(tokenA, tokenB), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
 
@@ -208,7 +208,7 @@ contract DEXManagement is Ownable, Pausable {
         bytes calldata swapCallData,
         address to,
         uint deadline
-    ) external whenNotPaused {
+    ) external whenNotPaused nonReentrant {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
         require(_amountIn > 0 , "Invalid amount");
         require(address(swapTarget) != address(0), "Zero address");
@@ -244,7 +244,7 @@ contract DEXManagement is Ownable, Pausable {
         uint256 _amountOutMin, 
         address to, 
         uint deadline
-    ) external payable whenNotPaused {
+    ) external payable whenNotPaused nonReentrant {
         require(isPathExists(token, dexRouter_.WETH()), "Invalid path");
         require(msg.value > 0 , "Invalid amount");
 
@@ -282,7 +282,7 @@ contract DEXManagement is Ownable, Pausable {
         bytes calldata swapCallData, 
         address to,
         uint deadline
-    ) external payable whenNotPaused {
+    ) external payable whenNotPaused nonReentrant {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
         require(msg.value > 0 , "Invalid amount");
         require(address(swapTarget) != address(0), "Zero address");
@@ -317,7 +317,7 @@ contract DEXManagement is Ownable, Pausable {
         uint256 _amountOutMin, 
         address to, 
         uint deadline
-    ) external whenNotPaused {
+    ) external whenNotPaused nonReentrant {
         require(isPathExists(token, dexRouter_.WETH()), "Invalid path");
         require(_amountIn > 0 , "Invalid amount");
 
@@ -363,7 +363,7 @@ contract DEXManagement is Ownable, Pausable {
         bytes calldata swapCallData,
         address to,
         uint deadline
-    ) external whenNotPaused {
+    ) external whenNotPaused nonReentrant {
         require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
         require(_amountIn > 0 , "Invalid amount");
         require(address(swapTarget) != address(0), "Zero address");
@@ -388,7 +388,7 @@ contract DEXManagement is Ownable, Pausable {
         emit LogSwapExactTokenForETHOn0x(token, _amountIn, boughtAmount);
     }
     
-    function withdraw(address token) external onlyOwner{
+    function withdraw(address token) external onlyOwner nonReentrant {
         require(IERC20(token).balanceOf(address(this)) > 0 || address(this).balance > 0, "Zero Balance!");
 
         if(address(this).balance > 0) {
