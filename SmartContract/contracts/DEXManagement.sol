@@ -156,7 +156,7 @@ contract DEXManagement is Ownable, Pausable {
 
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE) / 10000;
         
-        IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn);  
+        IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn);
 
         address[] memory path;
         if (isPairExists(tokenA, tokenB)) 
@@ -214,7 +214,7 @@ contract DEXManagement is Ownable, Pausable {
         IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn);
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
         
-        require(IERC20(tokenA).approve(spender, _swapAmountIn));
+        IERC20(tokenA).approve(spender, _swapAmountIn);
         
         uint256 boughtAmount = IERC20(tokenB).balanceOf(address(this));
 
@@ -325,7 +325,7 @@ contract DEXManagement is Ownable, Pausable {
         IERC20(token).transferFrom(_msgSender(), address(this), _amountIn);    
         uint256 _swapAmountIn = _amountIn * (10000 -  SWAP_FEE) / 10000;
         
-        IERC20(token).approve(address(dexRouter_), _swapAmountIn);    
+        IERC20(token).approve(address(dexRouter_), _swapAmountIn);
 
         uint256 boughtAmount = address(to).balance;
         dexRouter_.swapExactTokensForETHSupportingFeeOnTransferTokens(   
@@ -367,7 +367,7 @@ contract DEXManagement is Ownable, Pausable {
         IERC20(token).transferFrom(_msgSender(), address(this), _amountIn);
         uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
         
-        require(IERC20(token).approve(spender, _swapAmountIn));
+        IERC20(token).approve(spender, _swapAmountIn);
         
         uint256 boughtAmount = address(this).balance;
 
