@@ -98,7 +98,7 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 | WMATIC | 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 |
 | GooseBumpsSwapFactory | 0xa2A6A700452e4590c175C69C84c09655AbBC942F |
 | GooseBumpsSwapRouter02 | 0x8E49F3b03D2F482af5c564d933f44De7FDD9C746 |
-| DEXManagement | 0x1264a6f883EBb63Fdc83e45aB947dE134113a1E7 |
+| DEXManagement | 0x20Ab759865243C7fC5f540c7AE02e40BD4d3dBf8 |
 
 | Token Name | Token Symbol | Contract Address | Pair Address |
 |-------------------|-------------------|------------------|------------------|
