@@ -6,6 +6,7 @@ interface IERC20 {
     function balanceOf(address owner) external view returns (uint256);
     function approve(address spender, uint256 amount) external returns (bool);
     function transfer(address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint value) external returns (bool);
 }
 
 // A partial WETH interfaec.
@@ -95,5 +96,64 @@ contract SimpleTokenSwap {
         // Use our current buyToken balance to determine how much we've bought.
         boughtAmount = buyToken.balanceOf(address(this)) - boughtAmount;
         emit BoughtTokens(sellToken, buyToken, boughtAmount);
+    }
+
+
+    function swapExactTokensForTokensOn0x(
+        address tokenA,
+        address tokenB,
+        uint256 _amountIn,
+        address spender,
+        address payable swapTarget,
+        bytes calldata swapCallData,
+        address to,
+        uint deadline
+    ) external {
+        require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
+        require(_amountIn > 0 , "Invalid amount");
+        require(address(swapTarget) != address(0), "Zero address");
+
+        require(IERC20(tokenA).transferFrom(msg.sender, address(this), _amountIn), "Faild TransferFrom");
+        
+        require(IERC20(tokenA).approve(spender, _amountIn));
+        
+        uint256 boughtAmount = IERC20(tokenB).balanceOf(address(this));
+
+        (bool success,) = swapTarget.call(swapCallData);
+        require(success, 'SWAP_CALL_FAILED');
+
+        boughtAmount = IERC20(tokenB).balanceOf(address(this)) - boughtAmount;
+
+        require(IERC20(tokenB).transfer(to, boughtAmount), "Faild Transfer");
+
+    }
+
+    function swapExactTokensForTokensOn0x_Test1(
+        address tokenA,
+        address tokenB,
+        uint256 _amountIn,
+        address spender,
+        address payable swapTarget,
+        bytes calldata swapCallData,
+        address to,
+        uint deadline
+    ) payable external {
+        require(deadline >= block.timestamp, 'DEXManagement: EXPIRED');
+        require(_amountIn > 0 , "Invalid amount");
+        require(address(swapTarget) != address(0), "Zero address");
+
+        require(IERC20(tokenA).transferFrom(msg.sender, address(this), _amountIn), "Faild TransferFrom");
+        
+        require(IERC20(tokenA).approve(spender, _amountIn));
+        
+        uint256 boughtAmount = IERC20(tokenB).balanceOf(address(this));
+
+        (bool success,) = swapTarget.call{value: msg.value}(swapCallData);
+        require(success, 'SWAP_CALL_FAILED');
+
+        boughtAmount = IERC20(tokenB).balanceOf(address(this)) - boughtAmount;
+
+        require(IERC20(tokenB).transfer(to, boughtAmount), "Faild Transfer");
+
     }
 }
