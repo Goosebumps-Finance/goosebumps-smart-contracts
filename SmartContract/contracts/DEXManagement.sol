@@ -184,7 +184,7 @@ contract DEXManagement is Ownable, Pausable {
 
         IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn);
 
-        emit LogSwapExactTokensForTokens(tokenA, tokenB, _amountIn, boughtAmount)
+        emit LogSwapExactTokensForTokens(tokenA, tokenB, _amountIn, boughtAmount);
     }
 
     /**
@@ -263,7 +263,7 @@ contract DEXManagement is Ownable, Pausable {
 
         payable(TREASURY).transfer(msg.value - _swapAmountIn);
 
-        emit LogSwapExactETHForTokens(token, msg.value, boughtAmount)
+        emit LogSwapExactETHForTokens(token, msg.value, boughtAmount);
     }
 
     /**
@@ -339,7 +339,7 @@ contract DEXManagement is Ownable, Pausable {
 
         IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn);
 
-        emit LogSwapExactTokenForETH(token, _amountIn, boughtAmount)
+        emit LogSwapExactTokenForETH(token, _amountIn, boughtAmount);
     }
 
     /**
