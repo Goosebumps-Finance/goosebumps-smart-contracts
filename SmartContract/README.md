@@ -106,3 +106,23 @@ For faster runs of your tests and scripts, consider skipping ts-node's type chec
 | Polygon Token1 | Token1 | 0x4eda999a84Af9303D3298f0e34D1d509F6999DDF |  |
 | Polygon Token1 | Token1 | 0x56D018869C5Ba97E34975484c904B32799111D87 |  |
 | Polygon Token2 | Token2 | 0x0e5c05643215a50CA58e4774Ba3C27CEfe7310EF |  |
+
+## BSC Mainnet
+
+| Name | Contract Address |
+|-------------------|------------------|
+| _feeToSetter | 0x55FCfd515D9472D91689592F653F9fE59FC7663e |
+| Treasury | 0xc227D09Cc73d4845871FA095A6C1Fa3c4b5b0fE1 |
+
+| Contract Name | Contract Address |
+|-------------------|------------------|
+| WBNB | 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c |
+| GooseBumpsSwapFactory | 0x045e2e2A533dB4559533A71631962836c7802834 |
+| GooseBumpsSwapRouter02 | 0x5F227dce0baaFECF49ac4987fB5c07A993d36291 |
+| DEXManagement | 0x4D9cE73103C4FA07c4a6Fee7749CE37ec2804722 |
+
+| Token Name | Token Symbol | Contract Address | Pair Address |
+|-------------------|-------------------|------------------|------------------|
+| BSC Token0 | Token0 | 0x649ec09F064038244715A9d08B66b7D84db4449A |  |
+| BSC Token1 | Token1 | 0x1dA2340b2b4Fb163918121A1A4A3d6cC6a9Ab3Ca |  |
+| BSC Token2 | Token2 | 0xeA4427a1E526e5dC996058307413f6b14E1b7Cb7 |  |

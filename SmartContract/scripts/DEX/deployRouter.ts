@@ -22,8 +22,12 @@ async function main() {
   // const WETH = "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // Ropsten Testnet WETH Address
   
   // Polygon Mainnet
-  const factory = "0xa2A6A700452e4590c175C69C84c09655AbBC942F"; // Polygon Mainnet Factory Address
-  const WETH = "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"; // Polygon Mainnet WMTIC Address
+  // const factory = "0xa2A6A700452e4590c175C69C84c09655AbBC942F"; // Polygon Mainnet Factory Address
+  // const WETH = "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"; // Polygon Mainnet WMTIC Address
+  
+  // BSC Mainnet
+  const factory = "0x045e2e2A533dB4559533A71631962836c7802834"; // BSC Mainnet Factory Address
+  const WETH = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c"; // BSC Mainnet WBNB Address
   
   // We get the contract to deploy
   const GooseBumpsSwapRouter02 = await ethers.getContractFactory("GooseBumpsSwapRouter02");

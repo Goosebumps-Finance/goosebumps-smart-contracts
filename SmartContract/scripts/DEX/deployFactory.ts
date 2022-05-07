@@ -19,7 +19,10 @@ async function main() {
   // const _feeToSetter = "0x36285fDa2bE8a96fEb1d763CA77531D696Ae3B0b";
 
   // Polygon Mainnet
-  const _feeToSetter = "0x25bB177C3fE2f6a9B599616aCcD1Ed6f1765F2EB";
+  // const _feeToSetter = "0x25bB177C3fE2f6a9B599616aCcD1Ed6f1765F2EB";
+
+  // BSC Mainnet
+  const _feeToSetter = "0x55FCfd515D9472D91689592F653F9fE59FC7663e";
 
   const GooseBumpsSwapFactory = await ethers.getContractFactory("GooseBumpsSwapFactory");
   const gooseBumpsSwapFactory = await GooseBumpsSwapFactory.deploy(_feeToSetter);
