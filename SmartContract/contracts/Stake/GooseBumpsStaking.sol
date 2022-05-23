@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 contract GooseBumpsStaking is Ownable, Pausable {
+    
     struct StakerInfo {
         uint256 amount;
         uint256 startTime;
@@ -15,9 +16,9 @@ contract GooseBumpsStaking is Ownable, Pausable {
     // Staker Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 rewardRate = 86400;
-    uint256 oldRewardRate = rewardRate;
-    uint256 rewardRateUpdatedTime;
+    uint256 rewardRatePerSecondPerToken = 86400;
+    uint256 oldRewardRate = rewardRatePerSecondPerToken;
+    uint256 rewardRateUpdatedTime = block.timestamp;
 
     address public TREASURY;
     address public REWARD_WALLET;
@@ -28,7 +29,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
     event LogStake(address indexed from, uint256 amount);
     event LogUnstake(address indexed from, uint256 amount);
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
-    event LogSetRewardRate(uint256 rewardRate);
+    event LogSetRewardRate(uint256 rewardRatePerSecondPerToken);
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
     event LogReceived(address indexed, uint);
@@ -39,7 +40,6 @@ contract GooseBumpsStaking is Ownable, Pausable {
     constructor(IERC20 _stakeToken, IERC20 _rewardsToken) {
         stakeToken = _stakeToken;
         rewardsToken = _rewardsToken;
-        rewardRateUpdatedTime = block.timestamp;
     }
 
     function stake(uint256 _amount) external whenNotPaused {
@@ -80,10 +80,6 @@ contract GooseBumpsStaking is Ownable, Pausable {
         emit LogRewardsWithdrawal(msg.sender, toWithdraw);
     }
 
-    function getDeltaTime(address _staker) public view returns (uint256) {
-        return block.timestamp - staker[_staker].startTime;
-    }
-
     function getTotalRewards(address _staker) public view returns (uint256) {
         uint256 newRewards = 0;
         if (staker[_staker].amount > 0) {
@@ -95,13 +91,13 @@ contract GooseBumpsStaking is Ownable, Pausable {
                 uint256 timeRate1 = (time1 * 10**18) / oldRewardRate;
 
                 uint256 time2 = block.timestamp - rewardRateUpdatedTime;
-                uint256 timeRate2 = (time2 * 10**18) / rewardRate;
+                uint256 timeRate2 = (time2 * 10**18) / rewardRatePerSecondPerToken;
 
                 newRewards = (staker[_staker].amount * (timeRate1 + timeRate2)) /
                     10**18;
             } else {
-                uint256 time = getDeltaTime(_staker) * 10**18;
-                uint256 timeRate = time / rewardRate;
+                uint256 time = block.timestamp - staker[_staker].startTime;
+                uint256 timeRate = (time * 10**18) / rewardRatePerSecondPerToken;
                 newRewards = (staker[_staker].amount * timeRate) / 10**18;
             }
         }
@@ -110,9 +106,9 @@ contract GooseBumpsStaking is Ownable, Pausable {
 
     function setRewardRate(uint256 _rewardRate) external onlyOwner {
         rewardRateUpdatedTime = block.timestamp;
-        oldRewardRate = rewardRate;
-        rewardRate = _rewardRate;
-        emit LogSetRewardRate(rewardRate);
+        oldRewardRate = rewardRatePerSecondPerToken;
+        rewardRatePerSecondPerToken = _rewardRate;
+        emit LogSetRewardRate(rewardRatePerSecondPerToken);
     }
 
     function setTreasury(address _tresuary) external onlyOwner {
@@ -142,7 +138,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
     }
 
     function getRewardRate() external view returns (uint256) {
-        return rewardRate;
+        return rewardRatePerSecondPerToken;
     }
 
     function withdrawBNB(address payable account, uint256 amount) external onlyOwner {
