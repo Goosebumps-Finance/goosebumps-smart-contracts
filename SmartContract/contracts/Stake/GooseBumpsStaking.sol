@@ -147,7 +147,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
      * @notice Should not be withdrawn scam token.
      */
     function withdrawToken(IERC20 token, address account, uint256 amount) external onlyOwner {
-        require(amount <= token.balanceOf(account), "Incufficient funds");
+        require(amount <= token.balanceOf(address(this)), "Incufficient funds");
         require(token.transfer(account, amount), "Transfer Fail");
 
         emit LogWithdrawToken(address(token), account, amount);

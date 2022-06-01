@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./DEX/interfaces/IGooseBumpsSwapRouter02.sol";
 import "./DEX/interfaces/IGooseBumpsSwapFactory.sol";
 
+// found issue with transfer fee tokens
 contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
     
     //--------------------------------------
