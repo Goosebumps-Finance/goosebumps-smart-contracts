@@ -14,8 +14,8 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const name_ = "Roburna Token 1"
-  const symbol_ = "RT1"
+  const name_ = "Roburna Token A"
+  const symbol_ = "RT A"
 
   const Token = await ethers.getContractFactory("Token");
   const token = await Token.deploy(name_, symbol_);
