@@ -14,19 +14,15 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const _tokenName = "Polygon Token2";
-  const _tokenSymbol = "Token2";
-  const ERC20Token = await ethers.getContractFactory("ERC20Token");
-  const erc20Token = await ERC20Token.deploy(_tokenName, _tokenSymbol);
+  const name_ = "Roburna Token 1"
+  const symbol_ = "RT1"
 
-  await erc20Token.deployed();
+  const Token = await ethers.getContractFactory("Token");
+  const token = await Token.deploy(name_, symbol_);
 
-  console.log("ERC20Token deployed to:", erc20Token.address);
+  await token.deployed();
 
-  // const pair = await erc20Token.pair();
-
-  // console.log("pair address:", pair);
-
+  console.log("Token deployed to:", token.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
