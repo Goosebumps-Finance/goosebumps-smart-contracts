@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 contract GooseBumpsFarming is Ownable, Pausable {
-    
     struct FarmerInfo {
         uint256 amount;
         uint256 startTime;
@@ -32,10 +31,14 @@ contract GooseBumpsFarming is Ownable, Pausable {
     event LogSetRewardRate(uint256 rewardRatePerSecondPerToken);
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
-    event LogReceived(address indexed, uint);
-    event LogFallback(address indexed, uint);
-    event LogWithdrawalBNB(address indexed account, uint256 amount);
-    event LogWithdrawToken(address indexed token, address indexed account, uint256 amount);
+    event LogReceived(address indexed, uint256);
+    event LogFallback(address indexed, uint256);
+    event LogWithdrawalETH(address indexed recipient, uint256 amount);
+    event LogWithdrawToken(
+        address indexed token,
+        address indexed recipient,
+        uint256 amount
+    );
 
     constructor(IERC20 _lpToken, IERC20 _rewardsToken) {
         lpToken = _lpToken;
@@ -83,17 +86,21 @@ contract GooseBumpsFarming is Ownable, Pausable {
                 block.timestamp > rewardRateUpdatedTime &&
                 farmer[_staker].startTime < rewardRateUpdatedTime
             ) {
-                uint256 time1 = rewardRateUpdatedTime - farmer[_staker].startTime;
+                uint256 time1 = rewardRateUpdatedTime -
+                    farmer[_staker].startTime;
                 uint256 timeRate1 = (time1 * 10**18) / oldRewardRate;
 
                 uint256 time2 = block.timestamp - rewardRateUpdatedTime;
-                uint256 timeRate2 = (time2 * 10**18) / rewardRatePerSecondPerToken;
+                uint256 timeRate2 = (time2 * 10**18) /
+                    rewardRatePerSecondPerToken;
 
-                newRewards = (farmer[_staker].amount * (timeRate1 + timeRate2)) /
+                newRewards =
+                    (farmer[_staker].amount * (timeRate1 + timeRate2)) /
                     10**18;
             } else {
                 uint256 time = block.timestamp - farmer[_staker].startTime;
-                uint256 timeRate = (time * 10**18) / rewardRatePerSecondPerToken;
+                uint256 timeRate = (time * 10**18) /
+                    rewardRatePerSecondPerToken;
                 newRewards = (farmer[_staker].amount * timeRate) / 10**18;
             }
         }
@@ -116,7 +123,7 @@ contract GooseBumpsFarming is Ownable, Pausable {
         REWARD_WALLET = _rewardWallet;
         emit LogSetRewardWallet(REWARD_WALLET);
     }
-    
+
     function setPause() external onlyOwner {
         _pause();
     }
@@ -129,7 +136,7 @@ contract GooseBumpsFarming is Ownable, Pausable {
         emit LogReceived(_msgSender(), msg.value);
     }
 
-    fallback() external payable { 
+    fallback() external payable {
         emit LogFallback(_msgSender(), msg.value);
     }
 
@@ -137,19 +144,26 @@ contract GooseBumpsFarming is Ownable, Pausable {
         return rewardRatePerSecondPerToken;
     }
 
-    function withdrawBNB(address payable account, uint256 amount) external onlyOwner {
+    function withdrawETH(address payable recipient, uint256 amount)
+        external
+        onlyOwner
+    {
         require(amount <= (address(this)).balance, "Incufficient funds");
-        account.transfer(amount);
-        emit LogWithdrawalBNB(account, amount);
+        recipient.transfer(amount);
+        emit LogWithdrawalETH(recipient, amount);
     }
 
     /**
-     * @notice Should not be withdrawn scam token.
+     * @notice  Should not be withdrawn scam token.
      */
-    function withdrawToken(IERC20 token, address account, uint256 amount) external onlyOwner {
+    function withdrawToken(
+        IERC20 token,
+        address recipient,
+        uint256 amount
+    ) external onlyOwner {
         require(amount <= token.balanceOf(address(this)), "Incufficient funds");
-        require(token.transfer(account, amount), "Transfer Fail");
+        require(token.transfer(recipient, amount), "Transfer Fail");
 
-        emit LogWithdrawToken(address(token), account, amount);
+        emit LogWithdrawToken(address(token), recipient, amount);
     }
 }
