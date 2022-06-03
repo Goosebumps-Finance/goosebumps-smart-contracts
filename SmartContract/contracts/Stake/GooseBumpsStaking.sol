@@ -15,9 +15,9 @@ contract GooseBumpsStaking is Ownable, Pausable {
     // Staker Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 public rewardRatePerBlockPerToken = 86400;
-    uint256 public oldRewardRate = rewardRatePerBlockPerToken;
-    uint256 public rewardRateUpdatedBN = block.number;
+    uint256 public rewardRatePerBlockPerToken;
+    uint256 public oldRewardRate;
+    uint256 public rewardRateUpdatedBN;
 
     address public TREASURY;
     address public REWARD_WALLET;
@@ -46,12 +46,16 @@ contract GooseBumpsStaking is Ownable, Pausable {
         IERC20 _stakeToken,
         IERC20 _rewardsToken,
         address _treasury,
-        address _rewardWallet
+        address _rewardWallet,
+        uint256 _rewardRatePerBlockPerToken
     ) {
         stakeToken = _stakeToken;
         rewardsToken = _rewardsToken;
         TREASURY = _treasury;
         REWARD_WALLET = _rewardWallet;
+        rewardRatePerBlockPerToken = _rewardRatePerBlockPerToken;
+        oldRewardRate = _rewardRatePerBlockPerToken;
+        rewardRateUpdatedBN = block.number;
     }
 
     function stake(uint256 _amount) external whenNotPaused {
