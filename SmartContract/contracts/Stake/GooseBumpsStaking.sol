@@ -26,7 +26,11 @@ contract GooseBumpsStaking is Ownable, Pausable {
     IERC20 public rewardsToken;
 
     event LogStake(address indexed from, uint256 amount);
-    event LogUnstake(address indexed from, uint256 amount);
+    event LogUnstake(
+        address indexed from,
+        uint256 amount,
+        uint256 amountRewards
+    );
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
     event LogSetRewardRate(uint256 rewardRatePerBlockPerToken);
     event LogSetTreasury(address indexed newTreasury);
@@ -84,30 +88,38 @@ contract GooseBumpsStaking is Ownable, Pausable {
         require(_amount > 0, "Unstaking amount must be greater than zero");
         require(staker[msg.sender].amount >= _amount, "Insufficient unstake");
 
-        staker[msg.sender].stakeRewards = getTotalRewards(msg.sender);
-        staker[msg.sender].startBlock = block.number;
+        uint256 amountWithdraw = _withdrawRewards();
         staker[msg.sender].amount -= _amount;
 
         require(
             stakeToken.transferFrom(TREASURY, msg.sender, _amount),
             "TransferFrom fail"
         );
-        emit LogUnstake(msg.sender, _amount);
+
+        emit LogUnstake(msg.sender, _amount, amountWithdraw);
+    }
+
+    function _withdrawRewards() internal returns (uint256) {
+        uint256 amountWithdraw = getTotalRewards(msg.sender);
+        if (amountWithdraw > 0) {
+            staker[msg.sender].stakeRewards = 0;
+            staker[msg.sender].startBlock = block.number;
+            require(
+                rewardsToken.transferFrom(
+                    REWARD_WALLET,
+                    msg.sender,
+                    amountWithdraw
+                ),
+                "TransferFrom fail"
+            );
+        }
+        return amountWithdraw;
     }
 
     function withdrawRewards() external whenNotPaused {
-        uint256 amountWithdraw = getTotalRewards(msg.sender);
+        uint256 amountWithdraw = _withdrawRewards();
         require(amountWithdraw > 0, "Insufficient rewards balance");
-        staker[msg.sender].stakeRewards = 0;
-        staker[msg.sender].startBlock = block.number;
-        require(
-            rewardsToken.transferFrom(
-                REWARD_WALLET,
-                msg.sender,
-                amountWithdraw
-            ),
-            "TransferFrom fail"
-        );
+
         emit LogRewardsWithdrawal(msg.sender, amountWithdraw);
     }
 
