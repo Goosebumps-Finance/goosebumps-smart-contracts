@@ -8,16 +8,16 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 contract GooseBumpsStaking is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
-        uint256 startTime;
+        uint256 startBlock;
         uint256 stakeRewards;
     }
 
     // Staker Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 public rewardRatePerSecondPerToken = 86400;
-    uint256 public oldRewardRate = rewardRatePerSecondPerToken;
-    uint256 public rewardRateUpdatedTime = block.timestamp;
+    uint256 public rewardRatePerBlockPerToken = 86400;
+    uint256 public oldRewardRate = rewardRatePerBlockPerToken;
+    uint256 public rewardRateUpdatedBN = block.number;
 
     address public TREASURY;
     address public REWARD_WALLET;
@@ -28,7 +28,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
     event LogStake(address indexed from, uint256 amount);
     event LogUnstake(address indexed from, uint256 amount);
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
-    event LogSetRewardRate(uint256 rewardRatePerSecondPerToken);
+    event LogSetRewardRate(uint256 rewardRatePerBlockPerToken);
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
     event LogSetStakeToken(address stakeToken);
@@ -69,14 +69,14 @@ contract GooseBumpsStaking is Ownable, Pausable {
             "TransferFrom fail"
         );
         staker[msg.sender].amount += _amount;
-        staker[msg.sender].startTime = block.timestamp;
+        staker[msg.sender].startBlock = block.number;
         emit LogStake(msg.sender, _amount);
     }
 
     function unstake(uint256 _amount) external whenNotPaused {
         require(staker[msg.sender].amount >= _amount, "Insufficient unstake");
         staker[msg.sender].stakeRewards = getTotalRewards(msg.sender);
-        staker[msg.sender].startTime = block.timestamp;
+        staker[msg.sender].startBlock = block.number;
         staker[msg.sender].amount -= _amount;
         require(
             stakeToken.transferFrom(TREASURY, msg.sender, _amount),
@@ -89,7 +89,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
         uint256 toWithdraw = getTotalRewards(msg.sender);
         require(toWithdraw > 0, "Insufficient rewards balance");
         staker[msg.sender].stakeRewards = 0;
-        staker[msg.sender].startTime = block.timestamp;
+        staker[msg.sender].startBlock = block.number;
         require(
             rewardsToken.transferFrom(REWARD_WALLET, msg.sender, toWithdraw),
             "TransferFrom fail"
@@ -101,32 +101,32 @@ contract GooseBumpsStaking is Ownable, Pausable {
         uint256 newRewards = 0;
         if (staker[_staker].amount > 0) {
             if (
-                block.timestamp > rewardRateUpdatedTime &&
-                staker[_staker].startTime < rewardRateUpdatedTime
+                block.number > rewardRateUpdatedBN &&
+                staker[_staker].startBlock < rewardRateUpdatedBN
             ) {
-                uint256 time1 = rewardRateUpdatedTime -
-                    staker[_staker].startTime;
+                uint256 time1 = rewardRateUpdatedBN -
+                    staker[_staker].startBlock;
                 newRewards += (time1 * staker[_staker].amount) / oldRewardRate;
 
-                uint256 time2 = block.timestamp - rewardRateUpdatedTime;
+                uint256 time2 = block.number - rewardRateUpdatedBN;
                 newRewards +=
                     (time2 * staker[_staker].amount) /
-                    rewardRatePerSecondPerToken;
+                    rewardRatePerBlockPerToken;
             } else {
-                uint256 time = block.timestamp - staker[_staker].startTime;
+                uint256 time = block.number - staker[_staker].startBlock;
                 newRewards =
                     (staker[_staker].amount * time) /
-                    rewardRatePerSecondPerToken;
+                    rewardRatePerBlockPerToken;
             }
         }
         return newRewards + staker[_staker].stakeRewards;
     }
 
     function setRewardRate(uint256 _rewardRate) external onlyOwner {
-        rewardRateUpdatedTime = block.timestamp;
-        oldRewardRate = rewardRatePerSecondPerToken;
-        rewardRatePerSecondPerToken = _rewardRate;
-        emit LogSetRewardRate(rewardRatePerSecondPerToken);
+        rewardRateUpdatedBN = block.number;
+        oldRewardRate = rewardRatePerBlockPerToken;
+        rewardRatePerBlockPerToken = _rewardRate;
+        emit LogSetRewardRate(rewardRatePerBlockPerToken);
     }
 
     function setTreasury(address _tresuary) external onlyOwner {
@@ -170,7 +170,8 @@ contract GooseBumpsStaking is Ownable, Pausable {
         onlyOwner
     {
         require(amount <= (address(this)).balance, "Insufficient funds");
-        recipient.transfer(amount);
+        (bool success, ) = recipient.call{value: amount}(new bytes(0));
+        require(success, "ETH_TRANSFER_FAILED");
         emit LogWithdrawalETH(recipient, amount);
     }
 
