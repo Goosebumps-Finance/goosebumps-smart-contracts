@@ -15,9 +15,9 @@ contract GooseBumpsFarming is Ownable, Pausable {
     // Farmer Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 rewardRatePerSecondPerToken = 86400;
-    uint256 oldRewardRate = rewardRatePerSecondPerToken;
-    uint256 rewardRateUpdatedTime = block.timestamp;
+    uint256 public rewardRatePerSecondPerToken = 86400;
+    uint256 public oldRewardRate = rewardRatePerSecondPerToken;
+    uint256 public rewardRateUpdatedTime = block.timestamp;
 
     address public TREASURY;
     address public REWARD_WALLET;
@@ -31,6 +31,8 @@ contract GooseBumpsFarming is Ownable, Pausable {
     event LogSetRewardRate(uint256 rewardRatePerSecondPerToken);
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
+    event LogSetLpToken(address lpToken);
+    event LogSetRewardsToken(address rewardsToken);
     event LogReceived(address indexed, uint256);
     event LogFallback(address indexed, uint256);
     event LogWithdrawalETH(address indexed recipient, uint256 amount);
@@ -40,9 +42,16 @@ contract GooseBumpsFarming is Ownable, Pausable {
         uint256 amount
     );
 
-    constructor(IERC20 _lpToken, IERC20 _rewardsToken) {
+    constructor(
+        IERC20 _lpToken,
+        IERC20 _rewardsToken,
+        address _treasury,
+        address _rewardWallet
+    ) {
         lpToken = _lpToken;
         rewardsToken = _rewardsToken;
+        TREASURY = _treasury;
+        REWARD_WALLET = _rewardWallet;
     }
 
     function stake(uint256 _amount) external whenNotPaused {
@@ -124,6 +133,16 @@ contract GooseBumpsFarming is Ownable, Pausable {
         emit LogSetRewardWallet(REWARD_WALLET);
     }
 
+    function setLpToken(IERC20 _lpToken) external onlyOwner {
+        lpToken = _lpToken;
+        emit LogSetLpToken(address(lpToken));
+    }
+
+    function setRewardsToken(IERC20 _rewardsToken) external onlyOwner {
+        rewardsToken = _rewardsToken;
+        emit LogSetRewardsToken(address(rewardsToken));
+    }
+
     function setPause() external onlyOwner {
         _pause();
     }
@@ -138,10 +157,6 @@ contract GooseBumpsFarming is Ownable, Pausable {
 
     fallback() external payable {
         emit LogFallback(_msgSender(), msg.value);
-    }
-
-    function getRewardRate() external view returns (uint256) {
-        return rewardRatePerSecondPerToken;
     }
 
     function withdrawETH(address payable recipient, uint256 amount)
