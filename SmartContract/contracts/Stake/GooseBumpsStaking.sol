@@ -64,7 +64,10 @@ contract GooseBumpsStaking is Ownable, Pausable {
             staker[msg.sender].stakeRewards = getTotalRewards(msg.sender);
         }
 
-        stakeToken.transferFrom(msg.sender, TREASURY, _amount);
+        require(
+            stakeToken.transferFrom(msg.sender, TREASURY, _amount),
+            "TransferFrom fail"
+        );
         staker[msg.sender].amount += _amount;
         staker[msg.sender].startTime = block.timestamp;
         emit LogStake(msg.sender, _amount);
@@ -75,7 +78,10 @@ contract GooseBumpsStaking is Ownable, Pausable {
         staker[msg.sender].stakeRewards = getTotalRewards(msg.sender);
         staker[msg.sender].startTime = block.timestamp;
         staker[msg.sender].amount -= _amount;
-        stakeToken.transferFrom(TREASURY, msg.sender, _amount);
+        require(
+            stakeToken.transferFrom(TREASURY, msg.sender, _amount),
+            "TransferFrom fail"
+        );
         emit LogUnstake(msg.sender, _amount);
     }
 
@@ -84,7 +90,10 @@ contract GooseBumpsStaking is Ownable, Pausable {
         require(toWithdraw > 0, "Insufficient rewards balance");
         staker[msg.sender].stakeRewards = 0;
         staker[msg.sender].startTime = block.timestamp;
-        rewardsToken.transferFrom(REWARD_WALLET, msg.sender, toWithdraw);
+        require(
+            rewardsToken.transferFrom(REWARD_WALLET, msg.sender, toWithdraw),
+            "TransferFrom fail"
+        );
         emit LogRewardsWithdrawal(msg.sender, toWithdraw);
     }
 
@@ -97,20 +106,17 @@ contract GooseBumpsStaking is Ownable, Pausable {
             ) {
                 uint256 time1 = rewardRateUpdatedTime -
                     staker[_staker].startTime;
-                uint256 timeRate1 = (time1 * 10**18) / oldRewardRate;
+                newRewards += (time1 * staker[_staker].amount) / oldRewardRate;
 
                 uint256 time2 = block.timestamp - rewardRateUpdatedTime;
-                uint256 timeRate2 = (time2 * 10**18) /
+                newRewards +=
+                    (time2 * staker[_staker].amount) /
                     rewardRatePerSecondPerToken;
-
-                newRewards =
-                    (staker[_staker].amount * (timeRate1 + timeRate2)) /
-                    10**18;
             } else {
                 uint256 time = block.timestamp - staker[_staker].startTime;
-                uint256 timeRate = (time * 10**18) /
+                newRewards =
+                    (staker[_staker].amount * time) /
                     rewardRatePerSecondPerToken;
-                newRewards = (staker[_staker].amount * timeRate) / 10**18;
             }
         }
         return newRewards + staker[_staker].stakeRewards;
