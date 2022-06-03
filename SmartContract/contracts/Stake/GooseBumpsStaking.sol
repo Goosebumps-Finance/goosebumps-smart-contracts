@@ -59,8 +59,10 @@ contract GooseBumpsStaking is Ownable, Pausable {
     }
 
     function stake(uint256 _amount) external whenNotPaused {
+        require(_amount > 0, "Staking amount must be greater than zero");
+
         require(
-            _amount > 0 && stakeToken.balanceOf(msg.sender) >= _amount,
+            stakeToken.balanceOf(msg.sender) >= _amount,
             "Insufficient stakeToken balance"
         );
 
@@ -72,16 +74,20 @@ contract GooseBumpsStaking is Ownable, Pausable {
             stakeToken.transferFrom(msg.sender, TREASURY, _amount),
             "TransferFrom fail"
         );
+
         staker[msg.sender].amount += _amount;
         staker[msg.sender].startBlock = block.number;
         emit LogStake(msg.sender, _amount);
     }
 
     function unstake(uint256 _amount) external whenNotPaused {
+        require(_amount > 0, "Unstaking amount must be greater than zero");
         require(staker[msg.sender].amount >= _amount, "Insufficient unstake");
+
         staker[msg.sender].stakeRewards = getTotalRewards(msg.sender);
         staker[msg.sender].startBlock = block.number;
         staker[msg.sender].amount -= _amount;
+
         require(
             stakeToken.transferFrom(TREASURY, msg.sender, _amount),
             "TransferFrom fail"
@@ -90,15 +96,19 @@ contract GooseBumpsStaking is Ownable, Pausable {
     }
 
     function withdrawRewards() external whenNotPaused {
-        uint256 toWithdraw = getTotalRewards(msg.sender);
-        require(toWithdraw > 0, "Insufficient rewards balance");
+        uint256 amountWithdraw = getTotalRewards(msg.sender);
+        require(amountWithdraw > 0, "Insufficient rewards balance");
         staker[msg.sender].stakeRewards = 0;
         staker[msg.sender].startBlock = block.number;
         require(
-            rewardsToken.transferFrom(REWARD_WALLET, msg.sender, toWithdraw),
+            rewardsToken.transferFrom(
+                REWARD_WALLET,
+                msg.sender,
+                amountWithdraw
+            ),
             "TransferFrom fail"
         );
-        emit LogRewardsWithdrawal(msg.sender, toWithdraw);
+        emit LogRewardsWithdrawal(msg.sender, amountWithdraw);
     }
 
     function getTotalRewards(address _staker) public view returns (uint256) {
