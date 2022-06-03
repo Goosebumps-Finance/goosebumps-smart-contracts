@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract GooseBumpsStaking is Ownable, Pausable {
+contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
         uint256 startTime;
