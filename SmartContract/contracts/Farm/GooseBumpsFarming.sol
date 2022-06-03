@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 contract GooseBumpsFarming is Ownable, Pausable {
-    struct FarmerInfo {
+    struct StakerInfo {
         uint256 amount;
         uint256 startTime;
         uint256 farmRewards;
     }
 
     // Farmer Info
-    mapping(address => FarmerInfo) public farmer;
+    mapping(address => StakerInfo) public staker;
 
     uint256 rewardRatePerSecondPerToken = 86400;
     uint256 oldRewardRate = rewardRatePerSecondPerToken;
@@ -51,21 +51,21 @@ contract GooseBumpsFarming is Ownable, Pausable {
             "Insufficient lpToken balance"
         );
 
-        if (farmer[msg.sender].amount > 0) {
-            farmer[msg.sender].farmRewards = getTotalRewards(msg.sender);
+        if (staker[msg.sender].amount > 0) {
+            staker[msg.sender].farmRewards = getTotalRewards(msg.sender);
         }
 
         lpToken.transferFrom(msg.sender, TREASURY, _amount);
-        farmer[msg.sender].amount += _amount;
-        farmer[msg.sender].startTime = block.timestamp;
+        staker[msg.sender].amount += _amount;
+        staker[msg.sender].startTime = block.timestamp;
         emit LogStake(msg.sender, _amount);
     }
 
     function unstake(uint256 _amount) external whenNotPaused {
-        require(farmer[msg.sender].amount >= _amount, "Insufficient unstake");
-        farmer[msg.sender].farmRewards = getTotalRewards(msg.sender);
-        farmer[msg.sender].startTime = block.timestamp;
-        farmer[msg.sender].amount -= _amount;
+        require(staker[msg.sender].amount >= _amount, "Insufficient unstake");
+        staker[msg.sender].farmRewards = getTotalRewards(msg.sender);
+        staker[msg.sender].startTime = block.timestamp;
+        staker[msg.sender].amount -= _amount;
         lpToken.transferFrom(TREASURY, msg.sender, _amount);
         emit LogUnstake(msg.sender, _amount);
     }
@@ -73,21 +73,21 @@ contract GooseBumpsFarming is Ownable, Pausable {
     function withdrawRewards() external whenNotPaused {
         uint256 toWithdraw = getTotalRewards(msg.sender);
         require(toWithdraw > 0, "Insufficient rewards balance");
-        farmer[msg.sender].farmRewards = 0;
-        farmer[msg.sender].startTime = block.timestamp;
+        staker[msg.sender].farmRewards = 0;
+        staker[msg.sender].startTime = block.timestamp;
         rewardsToken.transferFrom(REWARD_WALLET, msg.sender, toWithdraw);
         emit LogRewardsWithdrawal(msg.sender, toWithdraw);
     }
 
     function getTotalRewards(address _staker) public view returns (uint256) {
         uint256 newRewards = 0;
-        if (farmer[_staker].amount > 0) {
+        if (staker[_staker].amount > 0) {
             if (
                 block.timestamp > rewardRateUpdatedTime &&
-                farmer[_staker].startTime < rewardRateUpdatedTime
+                staker[_staker].startTime < rewardRateUpdatedTime
             ) {
                 uint256 time1 = rewardRateUpdatedTime -
-                    farmer[_staker].startTime;
+                    staker[_staker].startTime;
                 uint256 timeRate1 = (time1 * 10**18) / oldRewardRate;
 
                 uint256 time2 = block.timestamp - rewardRateUpdatedTime;
@@ -95,16 +95,16 @@ contract GooseBumpsFarming is Ownable, Pausable {
                     rewardRatePerSecondPerToken;
 
                 newRewards =
-                    (farmer[_staker].amount * (timeRate1 + timeRate2)) /
+                    (staker[_staker].amount * (timeRate1 + timeRate2)) /
                     10**18;
             } else {
-                uint256 time = block.timestamp - farmer[_staker].startTime;
+                uint256 time = block.timestamp - staker[_staker].startTime;
                 uint256 timeRate = (time * 10**18) /
                     rewardRatePerSecondPerToken;
-                newRewards = (farmer[_staker].amount * timeRate) / 10**18;
+                newRewards = (staker[_staker].amount * timeRate) / 10**18;
             }
         }
-        return newRewards + farmer[_staker].farmRewards;
+        return newRewards + staker[_staker].farmRewards;
     }
 
     function setRewardRate(uint256 _rewardRate) external onlyOwner {
