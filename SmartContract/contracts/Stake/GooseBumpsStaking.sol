@@ -148,7 +148,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
         external
         onlyOwner
     {
-        require(amount <= (address(this)).balance, "Incufficient funds");
+        require(amount <= (address(this)).balance, "Insufficient funds");
         recipient.transfer(amount);
         emit LogWithdrawalETH(recipient, amount);
     }
@@ -161,7 +161,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
         address recipient,
         uint256 amount
     ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "Incufficient funds");
+        require(amount <= token.balanceOf(address(this)), "Insufficient funds");
         require(token.transfer(recipient, amount), "Transfer Fail");
 
         emit LogWithdrawToken(address(token), recipient, amount);
