@@ -15,8 +15,10 @@ contract GooseBumpsStaking is Ownable, Pausable {
     // Staker Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 public rewardRatePerBlockPerToken;
-    uint256 public oldRewardRate;
+    uint256 public rewardPerBlockTokenN;
+    uint256 public rewardPerBlockTokenD;
+    uint256 public oldRewardN;
+    uint256 public oldRewardD;
     uint256 public rewardRateUpdatedBN;
 
     address public TREASURY;
@@ -32,7 +34,10 @@ contract GooseBumpsStaking is Ownable, Pausable {
         uint256 amountRewards
     );
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
-    event LogSetRewardRate(uint256 rewardRatePerBlockPerToken);
+    event LogSetRewardRate(
+        uint256 rewardPerBlockTokenN,
+        uint256 rewardPerBlockTokenD
+    );
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
     event LogSetStakeToken(address stakeToken);
@@ -51,14 +56,17 @@ contract GooseBumpsStaking is Ownable, Pausable {
         IERC20 _rewardsToken,
         address _treasury,
         address _rewardWallet,
-        uint256 _rewardRatePerBlockPerToken
+        uint256 _rewardPerBlockTokenN,
+        uint256 _rewardPerBlockTokenD
     ) {
         stakeToken = _stakeToken;
         rewardsToken = _rewardsToken;
         TREASURY = _treasury;
         REWARD_WALLET = _rewardWallet;
-        rewardRatePerBlockPerToken = _rewardRatePerBlockPerToken;
-        oldRewardRate = _rewardRatePerBlockPerToken;
+        rewardPerBlockTokenN = _rewardPerBlockTokenN;
+        rewardPerBlockTokenD = _rewardPerBlockTokenD;
+        oldRewardN = rewardPerBlockTokenN;
+        oldRewardD = rewardPerBlockTokenD;
         rewardRateUpdatedBN = block.number;
     }
 
@@ -130,29 +138,36 @@ contract GooseBumpsStaking is Ownable, Pausable {
                 block.number > rewardRateUpdatedBN &&
                 staker[_staker].startBlock < rewardRateUpdatedBN
             ) {
-                uint256 time1 = rewardRateUpdatedBN -
+                uint256 delta1 = rewardRateUpdatedBN -
                     staker[_staker].startBlock;
-                newRewards += (time1 * staker[_staker].amount) / oldRewardRate;
-
-                uint256 time2 = block.number - rewardRateUpdatedBN;
                 newRewards +=
-                    (time2 * staker[_staker].amount) /
-                    rewardRatePerBlockPerToken;
+                    (delta1 * staker[_staker].amount * oldRewardN) /
+                    oldRewardD;
+
+                uint256 delta2 = block.number - rewardRateUpdatedBN;
+                newRewards +=
+                    (delta2 * staker[_staker].amount * rewardPerBlockTokenN) /
+                    rewardPerBlockTokenD;
             } else {
-                uint256 time = block.number - staker[_staker].startBlock;
+                uint256 delta = block.number - staker[_staker].startBlock;
                 newRewards =
-                    (staker[_staker].amount * time) /
-                    rewardRatePerBlockPerToken;
+                    (staker[_staker].amount * delta * rewardPerBlockTokenN) /
+                    rewardPerBlockTokenD;
             }
         }
         return newRewards + staker[_staker].stakeRewards;
     }
 
-    function setRewardRate(uint256 _rewardRate) external onlyOwner {
+    function setRewardRate(uint256 _rewardRateN, uint256 _rewardRateD)
+        external
+        onlyOwner
+    {
         rewardRateUpdatedBN = block.number;
-        oldRewardRate = rewardRatePerBlockPerToken;
-        rewardRatePerBlockPerToken = _rewardRate;
-        emit LogSetRewardRate(rewardRatePerBlockPerToken);
+        oldRewardN = rewardPerBlockTokenN;
+        oldRewardD = rewardPerBlockTokenD;
+        rewardPerBlockTokenN = _rewardRateN;
+        rewardPerBlockTokenD = _rewardRateD;
+        emit LogSetRewardRate(rewardPerBlockTokenN, rewardPerBlockTokenD);
     }
 
     function setTreasury(address _tresuary) external onlyOwner {
