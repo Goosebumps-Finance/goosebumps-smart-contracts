@@ -177,10 +177,9 @@ contract GooseBumpsStaking is Ownable, Pausable {
             rewardPerBlockTokenD = _rewardRateD;
         }
 
-        if (flag == true) {
-            rewardRateUpdatedBN = block.number;
-            emit LogSetRewardRate(rewardPerBlockTokenN, rewardPerBlockTokenD);
-        }
+        require(flag, "Same Value");
+        rewardRateUpdatedBN = block.number;
+        emit LogSetRewardRate(rewardPerBlockTokenN, rewardPerBlockTokenD);
     }
 
     function setTreasury(address _tresuary) external onlyOwner {
