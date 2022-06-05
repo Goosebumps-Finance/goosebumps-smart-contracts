@@ -120,13 +120,7 @@ contract GooseBumpsStaking is Ownable, Pausable {
     }
 
     function getTotalRewards(address _staker) public view returns (uint256) {
-        uint256 newRewards = 0;
-        if (block.number > staker[_staker].startBlock) {
-            uint256 delta = block.number - staker[_staker].startBlock;
-            newRewards =
-                (delta * staker[_staker].amount * rewardPerBlockTokenN) /
-                rewardPerBlockTokenD;
-        }
+        uint256 newRewards = (block.number - staker[_staker].startBlock) * staker[_staker].amount * rewardPerBlockTokenN / rewardPerBlockTokenD;
         return newRewards + staker[_staker].stakeRewards;
     }
 
