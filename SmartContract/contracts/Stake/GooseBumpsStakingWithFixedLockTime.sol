@@ -18,6 +18,8 @@ contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
     uint256 public immutable rewardPerBlockTokenN;
     uint256 public immutable rewardPerBlockTokenD; // Must be greater than zero
 
+    uint256 public lockTime = 30 days;
+
     IERC20 public immutable stakeToken;
     IERC20 public immutable rewardsToken;
 
@@ -33,6 +35,7 @@ contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
+    event LogSetLockTime(uint256 lockTime);
     event LogReceived(address indexed, uint256);
     event LogFallback(address indexed, uint256);
     event LogWithdrawalETH(address indexed recipient, uint256 amount);
@@ -136,6 +139,11 @@ contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
     function setRewardWallet(address _rewardWallet) external onlyOwner {
         REWARD_WALLET = _rewardWallet;
         emit LogSetRewardWallet(REWARD_WALLET);
+    }
+
+    function setLockTime(uint256 _lockTime) external onlyOwner {
+        lockTime = _lockTime;
+        emit LogSetLockTime(lockTime);
     }
 
     function setPause() external onlyOwner {
