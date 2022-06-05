@@ -15,17 +15,14 @@ contract GooseBumpsStaking is Ownable, Pausable {
     // Staker Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 public rewardPerBlockTokenN;
-    uint256 public rewardPerBlockTokenD;
-    uint256 public oldRewardN;
-    uint256 public oldRewardD;
-    uint256 public rewardRateUpdatedBN;
+    uint256 public immutable rewardPerBlockTokenN;
+    uint256 public immutable rewardPerBlockTokenD; // Must be greater than zero
+
+    IERC20 public immutable stakeToken;
+    IERC20 public immutable rewardsToken;
 
     address public TREASURY;
     address public REWARD_WALLET;
-
-    IERC20 public stakeToken;
-    IERC20 public rewardsToken;
 
     event LogStake(address indexed from, uint256 amount);
     event LogUnstake(
@@ -34,14 +31,8 @@ contract GooseBumpsStaking is Ownable, Pausable {
         uint256 amountRewards
     );
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
-    event LogSetRewardRate(
-        uint256 rewardPerBlockTokenN,
-        uint256 rewardPerBlockTokenD
-    );
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
-    event LogSetStakeToken(address stakeToken);
-    event LogSetRewardsToken(address rewardsToken);
     event LogReceived(address indexed, uint256);
     event LogFallback(address indexed, uint256);
     event LogWithdrawalETH(address indexed recipient, uint256 amount);
@@ -65,9 +56,6 @@ contract GooseBumpsStaking is Ownable, Pausable {
         REWARD_WALLET = _rewardWallet;
         rewardPerBlockTokenN = _rewardPerBlockTokenN;
         rewardPerBlockTokenD = _rewardPerBlockTokenD;
-        oldRewardN = rewardPerBlockTokenN;
-        oldRewardD = rewardPerBlockTokenD;
-        rewardRateUpdatedBN = block.number;
     }
 
     function stake(uint256 _amount) external whenNotPaused {
@@ -133,53 +121,13 @@ contract GooseBumpsStaking is Ownable, Pausable {
 
     function getTotalRewards(address _staker) public view returns (uint256) {
         uint256 newRewards = 0;
-        if (staker[_staker].amount > 0) {
-            if (
-                block.number > rewardRateUpdatedBN &&
-                staker[_staker].startBlock < rewardRateUpdatedBN
-            ) {
-                uint256 delta1 = rewardRateUpdatedBN -
-                    staker[_staker].startBlock;
-                newRewards +=
-                    (delta1 * staker[_staker].amount * oldRewardN) /
-                    oldRewardD;
-
-                uint256 delta2 = block.number - rewardRateUpdatedBN;
-                newRewards +=
-                    (delta2 * staker[_staker].amount * rewardPerBlockTokenN) /
-                    rewardPerBlockTokenD;
-            } else {
-                uint256 delta = block.number - staker[_staker].startBlock;
-                newRewards =
-                    (staker[_staker].amount * delta * rewardPerBlockTokenN) /
-                    rewardPerBlockTokenD;
-            }
+        if (block.number > staker[_staker].startBlock) {
+            uint256 delta = block.number - staker[_staker].startBlock;
+            newRewards =
+                (delta * staker[_staker].amount * rewardPerBlockTokenN) /
+                rewardPerBlockTokenD;
         }
         return newRewards + staker[_staker].stakeRewards;
-    }
-
-    function setRewardRate(uint256 _rewardRateN, uint256 _rewardRateD)
-        external
-        onlyOwner
-    {
-        require(_rewardRateD > 0, "Denominator must be greater than zero");
-
-        bool flag = false;
-        if (rewardPerBlockTokenN != _rewardRateN) {
-            flag = true;
-            oldRewardN = rewardPerBlockTokenN;
-            rewardPerBlockTokenN = _rewardRateN;
-        }
-
-        if (rewardPerBlockTokenD != _rewardRateD) {
-            flag = true;
-            oldRewardD = rewardPerBlockTokenD;
-            rewardPerBlockTokenD = _rewardRateD;
-        }
-
-        require(flag, "Same Value");
-        rewardRateUpdatedBN = block.number;
-        emit LogSetRewardRate(rewardPerBlockTokenN, rewardPerBlockTokenD);
     }
 
     function setTreasury(address _tresuary) external onlyOwner {
@@ -190,16 +138,6 @@ contract GooseBumpsStaking is Ownable, Pausable {
     function setRewardWallet(address _rewardWallet) external onlyOwner {
         REWARD_WALLET = _rewardWallet;
         emit LogSetRewardWallet(REWARD_WALLET);
-    }
-
-    function setStakeToken(IERC20 _stakeToken) external onlyOwner {
-        stakeToken = _stakeToken;
-        emit LogSetStakeToken(address(stakeToken));
-    }
-
-    function setRewardsToken(IERC20 _rewardsToken) external onlyOwner {
-        rewardsToken = _rewardsToken;
-        emit LogSetRewardsToken(address(rewardsToken));
     }
 
     function setPause() external onlyOwner {
