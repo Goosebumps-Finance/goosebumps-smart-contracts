@@ -15,10 +15,15 @@ async function main() {
 
   // We get the contract to deploy
 
-  const _stakeToken = "";
-  const _rewardsToken = "";
+  const _stakeToken = ""
+  const _rewardsToken = ""
+  const _treasury = ""
+  const _rewardWallet = ""
+  const _rewardPerBlockTokenN = ""
+  const _rewardPerBlockTokenD = ""
+
   const GooseBumpsStaking = await ethers.getContractFactory("GooseBumpsStaking");
-  const gooseBumpsStaking = await GooseBumpsStaking.deploy(_stakeToken, _rewardsToken);
+  const gooseBumpsStaking = await GooseBumpsStaking.deploy(_stakeToken, _rewardsToken, _treasury, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
 
   await gooseBumpsStaking.deployed();
 
