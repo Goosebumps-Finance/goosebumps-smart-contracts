@@ -15,12 +15,12 @@ async function main() {
 
   // We get the contract to deploy
 
-  const _stakeToken = ""
-  const _rewardsToken = ""
-  const _treasury = ""
-  const _rewardWallet = ""
-  const _rewardPerBlockTokenN = ""
-  const _rewardPerBlockTokenD = ""
+  const _stakeToken = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _rewardsToken = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _treasury = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _rewardWallet = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _rewardPerBlockTokenN = 100;
+  const _rewardPerBlockTokenD = 100;
 
   const GooseBumpsStakingWithFixedLockTime = await ethers.getContractFactory("GooseBumpsStakingWithFixedLockTime");
   const gooseBumpsStakingWithFixedLockTime = await GooseBumpsStakingWithFixedLockTime.deploy(_stakeToken, _rewardsToken, _treasury, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);

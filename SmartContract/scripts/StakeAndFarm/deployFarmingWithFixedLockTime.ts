@@ -15,12 +15,12 @@ async function main() {
 
   // We get the contract to deploy
 
-  const _lpToken = ""
-  const _rewardsToken = ""
-  const _treasury = ""
-  const _rewardWallet = ""
-  const _rewardPerBlockTokenN = ""
-  const _rewardPerBlockTokenD = ""
+  const _lpToken = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _rewardsToken = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _treasury = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _rewardWallet = "0x256C9FbE9093E7b9E3C4584aDBC3066D8c6216da";
+  const _rewardPerBlockTokenN = 100;
+  const _rewardPerBlockTokenD = 100;
 
   const GooseBumpsFarmingWithFixedLockTime = await ethers.getContractFactory("GooseBumpsFarmingWithFixedLockTime");
   const gooseBumpsFarmingWithFixedLockTime = await GooseBumpsFarmingWithFixedLockTime.deploy(_lpToken, _rewardsToken, _treasury, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
