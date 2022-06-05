@@ -86,6 +86,8 @@ contract GooseBumpsStaking is Ownable, Pausable {
 
         uint256 amountWithdraw = _withdrawRewards();
         staker[msg.sender].amount -= _amount;
+        staker[msg.sender].startBlock = block.number;
+        staker[msg.sender].stakeRewards = 0;
 
         require(
             stakeToken.transferFrom(TREASURY, msg.sender, _amount),
@@ -98,8 +100,6 @@ contract GooseBumpsStaking is Ownable, Pausable {
     function _withdrawRewards() internal returns (uint256) {
         uint256 amountWithdraw = getTotalRewards(msg.sender);
         if (amountWithdraw > 0) {
-            staker[msg.sender].stakeRewards = 0;
-            staker[msg.sender].startBlock = block.number;
             require(
                 rewardsToken.transferFrom(
                     REWARD_WALLET,
@@ -115,12 +115,16 @@ contract GooseBumpsStaking is Ownable, Pausable {
     function withdrawRewards() external whenNotPaused {
         uint256 amountWithdraw = _withdrawRewards();
         require(amountWithdraw > 0, "Insufficient rewards balance");
+        staker[msg.sender].startBlock = block.number;
+        staker[msg.sender].stakeRewards = 0;
 
         emit LogRewardsWithdrawal(msg.sender, amountWithdraw);
     }
 
     function getTotalRewards(address _staker) public view returns (uint256) {
-        uint256 newRewards = (block.number - staker[_staker].startBlock) * staker[_staker].amount * rewardPerBlockTokenN / rewardPerBlockTokenD;
+        uint256 newRewards = ((block.number - staker[_staker].startBlock) *
+            staker[_staker].amount *
+            rewardPerBlockTokenN) / rewardPerBlockTokenD;
         return newRewards + staker[_staker].stakeRewards;
     }
 
