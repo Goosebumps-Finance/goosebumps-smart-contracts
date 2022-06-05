@@ -9,8 +9,8 @@ import { Contract } from "ethers";
 
 let accountList: SignerWithAddress[];
 let gooseBumpsStaking: Contract;
-let _stakeToken: string;
-let _rewardsToken: string;
+let stakeToken: Contract;
+let rewardToken: Contract;
 
 before(async function () {
     accountList = await ethers.getSigners();
@@ -19,7 +19,7 @@ before(async function () {
     let symbol_ = "Stake Token"
 
     const Token = await ethers.getContractFactory("Token");
-    const stakeToken = await Token.deploy(name_, symbol_);
+    stakeToken = await Token.deploy(name_, symbol_);
 
     await stakeToken.deployed();
 
@@ -30,7 +30,7 @@ before(async function () {
     name_ = "Roburna Reward Token"
     symbol_ = "Reward Token"
 
-    const rewardToken = await Token.deploy(name_, symbol_);
+    rewardToken = await Token.deploy(name_, symbol_);
 
     console.log("rewardToken deployed to:", rewardToken.address);
 
@@ -149,4 +149,87 @@ describe("GooseBumpsStaking Test", function () {
         });
     });
 
+    describe("withdrawETH and withdrawToken Test", function () {
+        describe("withdrawETH Test", function () {
+            let balance;
+            // it("withdrawToken success", async function () {
+            //     const transferTx = await rewardToken.connect(accountList[0]).transfer(gooseBumpsStaking.address, ethers.utils.parseEther("100"));
+
+            //     await transferTx.wait();
+
+            //     balance = await rewardToken.balanceOf(accountList[1].address);
+
+            //     console.log("           balance: ", ethers.utils.formatEther(balance))
+
+            //     const withdrawTokenTx = await gooseBumpsStaking.connect(accountList[0]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("50"));
+
+            //     await withdrawTokenTx.wait();
+
+            //     console.log("           withdrawTokenTx hash: ", withdrawTokenTx.hash);
+
+            //     balance = await rewardToken.balanceOf(accountList[1].address);
+            //     console.log("           balance: ", ethers.utils.formatEther(balance))
+            // });
+
+            // it("withdrawToken success with emit LogWithdrawToken", async function () {
+            //     await expect(gooseBumpsStaking.connect(accountList[0]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("25")))
+            //         .to.emit(gooseBumpsStaking, "LogWithdrawToken").withArgs(rewardToken.address, accountList[1].address, ethers.utils.parseEther("25"));
+
+            //     balance = await rewardToken.balanceOf(accountList[1].address);
+            //     console.log("           balance: ", ethers.utils.formatEther(balance))
+            // });
+
+            // it("withdrawToken fail because caller is not the owner", async function () {
+            //     await expect(gooseBumpsStaking.connect(accountList[1]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("10")))
+            //         .to.revertedWith('Ownable: caller is not the owner');
+            // });
+
+            it("withdrawETH fail revertedWith 'INSUFFICIENT_FUNDS'", async function () {
+                await expect(gooseBumpsStaking.connect(accountList[0]).withdrawETH(accountList[1].address, ethers.utils.parseEther("1")))
+                    .to.revertedWith('INSUFFICIENT_FUNDS');
+            });
+        });
+
+        describe("withdrawToken Test", function () {
+            let balance;
+            it("withdrawToken success", async function () {
+                const transferTx = await rewardToken.connect(accountList[0]).transfer(gooseBumpsStaking.address, ethers.utils.parseEther("100"));
+
+                await transferTx.wait();
+
+                balance = await rewardToken.balanceOf(accountList[1].address);
+
+                console.log("           balance: ", ethers.utils.formatEther(balance))
+
+                const withdrawTokenTx = await gooseBumpsStaking.connect(accountList[0]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("50"));
+
+                await withdrawTokenTx.wait();
+
+                console.log("           withdrawTokenTx hash: ", withdrawTokenTx.hash);
+
+                balance = await rewardToken.balanceOf(accountList[1].address);
+                console.log("           balance: ", ethers.utils.formatEther(balance))
+            });
+
+            it("withdrawToken success with emit LogWithdrawToken", async function () {
+                await expect(gooseBumpsStaking.connect(accountList[0]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("25")))
+                    .to.emit(gooseBumpsStaking, "LogWithdrawToken").withArgs(rewardToken.address, accountList[1].address, ethers.utils.parseEther("25"));
+
+                balance = await rewardToken.balanceOf(accountList[1].address);
+                console.log("           balance: ", ethers.utils.formatEther(balance))
+            });
+
+            it("withdrawToken fail because caller is not the owner", async function () {
+                await expect(gooseBumpsStaking.connect(accountList[1]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("10")))
+                    .to.revertedWith('Ownable: caller is not the owner');
+            });
+
+            it("withdrawToken fail revertedWith 'INSUFFICIENT_FUNDS'", async function () {
+                balance = await rewardToken.balanceOf(gooseBumpsStaking.address);
+                console.log("           balanceOf gooseBumpsStaking: ", ethers.utils.formatEther(balance))
+                await expect(gooseBumpsStaking.connect(accountList[0]).withdrawToken(rewardToken.address, accountList[1].address, ethers.utils.parseEther("26")))
+                    .to.revertedWith('INSUFFICIENT_FUNDS');
+            });
+        });
+    });
 });

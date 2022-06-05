@@ -158,7 +158,7 @@ contract GooseBumpsFarming is Ownable, Pausable {
         external
         onlyOwner
     {
-        require(amount <= (address(this)).balance, "Insufficient funds");
+        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
         (bool success, ) = recipient.call{value: amount}(new bytes(0));
         require(success, "ETH_TRANSFER_FAILED");
         emit LogWithdrawalETH(recipient, amount);
@@ -172,8 +172,8 @@ contract GooseBumpsFarming is Ownable, Pausable {
         address recipient,
         uint256 amount
     ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "Insufficient funds");
-        require(token.transfer(recipient, amount), "Transfer Fail");
+        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
+        require(token.transfer(recipient, amount), "TRANSFER_FAILED");
 
         emit LogWithdrawToken(address(token), recipient, amount);
     }
