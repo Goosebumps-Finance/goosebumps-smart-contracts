@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
+        uint256 endTime;
         uint256 startBlock;
         uint256 stakeRewards;
     }
@@ -18,10 +19,10 @@ contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
     uint256 public immutable rewardPerBlockTokenN;
     uint256 public immutable rewardPerBlockTokenD; // Must be greater than zero
 
-    uint256 public lockTime = 30 days;
-
     IERC20 public immutable stakeToken;
     IERC20 public immutable rewardsToken;
+
+    uint256 public lockTime = 30 days;
 
     address public TREASURY;
     address public REWARD_WALLET;
@@ -80,10 +81,15 @@ contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
 
         staker[msg.sender].amount += _amount;
         staker[msg.sender].startBlock = block.number;
+        staker[msg.sender].endTime = block.timestamp + lockTime;
         emit LogStake(msg.sender, _amount);
     }
 
     function unstake(uint256 _amount) external whenNotPaused {
+        require(
+            block.timestamp > staker[msg.sender].endTime,
+            "Can't unstake yet"
+        );
         require(_amount > 0, "Unstaking amount must be greater than zero");
         require(staker[msg.sender].amount >= _amount, "Insufficient unstake");
 
