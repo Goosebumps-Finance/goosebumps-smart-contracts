@@ -2,6 +2,7 @@ import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 
 import gooseBumpsStakingAbi from "../artifacts/contracts/Stake/GooseBumpsStaking.sol/GooseBumpsStaking.json"
+import empireAbi from "../artifacts/contracts/Empire/EmpireToken.sol/EmpireToken.json"
 import tokenAbi from "../artifacts/contracts/Token.sol/Token.json";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
@@ -17,7 +18,7 @@ let staker2: SignerWithAddress;
 before(async function () {
     accountList = await ethers.getSigners();
 
-    stakeToken = new ethers.Contract('0xD6cf8aeEeBf84C43e28934D6D743820195BBa59C', tokenAbi.abi, ethers.provider)
+    stakeToken = new ethers.Contract('0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB', empireAbi.abi, ethers.provider)
     rewardToken = new ethers.Contract('0xA1a83bC7712f65E646933a5E00A90537Fc847835', tokenAbi.abi, ethers.provider)
     gooseBumpsStaking = new ethers.Contract('0xcC95a853928dC9b661EB5355661E3Bbc70c7b96e', gooseBumpsStakingAbi.abi, ethers.provider)
 

@@ -78,6 +78,9 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545"
     },
     hardhat: {
+      forking: {
+        url: process.env.BSCTESTNET_URL || "",
+      },
       accounts: {
         mnemonic: process.env.MNEMONIC,
         path: "m/44'/60'/0'/0",
