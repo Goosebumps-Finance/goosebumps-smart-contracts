@@ -107,3 +107,4 @@ SmartContract/package-lock.json
 SmartContract/.command
 SmartContract/faltten.sol
 SmartContract/testOnhardhat/
+SmartContract/StakingOnBSCTestnet.txt
