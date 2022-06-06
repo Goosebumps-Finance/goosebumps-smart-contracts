@@ -151,6 +151,9 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
+  mocha: {
+    timeout: 100000000
+  },
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
