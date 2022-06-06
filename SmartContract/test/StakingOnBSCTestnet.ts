@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre, { ethers } from "hardhat";
 
 import gooseBumpsStakingAbi from "../artifacts/contracts/Stake/GooseBumpsStaking.sol/GooseBumpsStaking.json"
-import tokenAbi from "../artifacts/contracts/Token.sol/Token.json"
+import tokenAbi from "../artifacts/contracts/Token.sol/Token.json";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { Contract } from "ethers";
@@ -29,14 +29,14 @@ before(async function () {
     console.log("rewardPerBlockTokenD: ", await gooseBumpsStaking.rewardPerBlockTokenD());
 
     for (let i = 1; i < accountList.length; i++) {
-        if (parseFloat(ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address))) < 9999) {
-            await expect(stakeToken.connect(accountList[0]).transfer(accountList[i].address, ethers.utils.parseEther("10000")))
-                .to.emit(stakeToken, "Transfer").withArgs(accountList[0].address, accountList[i].address, ethers.utils.parseEther("10000"));
+        if (parseFloat(ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address))) < 999) {
+            await expect(stakeToken.connect(accountList[0]).transfer(accountList[i].address, ethers.utils.parseEther("1000")))
+                .to.emit(stakeToken, "Transfer").withArgs(accountList[0].address, accountList[i].address, ethers.utils.parseEther("1000"));
         }
         console.log("Token balance of %s is %s Stake Token", accountList[i].address, ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address)))
 
         if (parseFloat(ethers.utils.formatEther(await ethers.provider.getBalance(accountList[i].address))) < 0.099) {
-            const transferETHTx = await accountList[0].sendTransaction({ to: gooseBumpsStaking.address, value: ethers.utils.parseEther("0.1"), gasPrice: 10, gasLimit: 21000 });
+            const transferETHTx = await accountList[0].sendTransaction({ to: accountList[i].address, value: ethers.utils.parseEther("0.1"), gasPrice: ethers.utils.parseUnits("10", 9), gasLimit: 21000 });
             await transferETHTx.wait();
         }
         console.log("ETH balance of %s is %s ETH", accountList[i].address, parseFloat(ethers.utils.formatEther(await ethers.provider.getBalance(accountList[i].address))))
@@ -368,7 +368,7 @@ describe("GooseBumpsStaking Test", function () {
 
                 await prewithdrawETHTx.wait();
 
-                const transferETHTx = await accountList[0].sendTransaction({ to: gooseBumpsStaking.address, value: ethers.utils.parseEther("0.1"), gasPrice: 10, gasLimit: 21000 });
+                const transferETHTx = await accountList[0].sendTransaction({ to: gooseBumpsStaking.address, value: ethers.utils.parseEther("0.1"), gasPrice: ethers.utils.parseUnits("10", 9), gasLimit: 21000 });
                 await transferETHTx.wait();
                 console.log("           transferETHTx hash: ", transferETHTx.hash);
 
