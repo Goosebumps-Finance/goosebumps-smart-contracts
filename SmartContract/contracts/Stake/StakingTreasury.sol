@@ -10,7 +10,6 @@ import "./interfaces/IReflectionsDistributor.sol";
 contract StakingTresuary is Ownable, IStakingTresuary {
     address public stakingVault;
     uint256 public minAmountReflection = 1000 * 10**9;
-    address public reflectionsDistributorAddress;
     uint256 public totalStakedBalance;
 
     IERC20 public stakeToken;
@@ -31,6 +30,16 @@ contract StakingTresuary is Ownable, IStakingTresuary {
         uint256 amount
     );
 
+    constructor(
+        address _stakingVault,
+        IERC20 _stakeToken,
+        IReflectionsDistributor _reflectionsDistributor
+    ) {
+        stakeToken = _stakeToken;
+        stakingVault = _stakingVault;
+        reflectionsDistributor = _reflectionsDistributor;
+    }
+
     /**
      * @dev Throws if called by any account other than the owner or deployer.
      */
@@ -42,42 +51,35 @@ contract StakingTresuary is Ownable, IStakingTresuary {
         _;
     }
 
-    constructor(
-        address _stakingVault,
-        IERC20 _stakeToken,
-        IReflectionsDistributor _reflectionsDistributor
-    ) {
-        stakeToken = _stakeToken;
-        stakingVault = _stakingVault;
-        reflectionsDistributor = _reflectionsDistributor;
-    }
-
-    function deposit(address staker, uint256 amount) external onlyStakingVault {
-        require(
-            stakeToken.allowance(staker, address(this)) >= amount,
-            "Insufficient allowance."
-        );
-
-        uint256 contractBalance = getTotalStakedBalance();
-        uint256 contractBalanceWReflections = stakeToken.balanceOf(
-            address(this)
-        );
-        uint256 reflections = contractBalanceWReflections - contractBalance;
+    function transferReflections() internal {
+        uint256 reflections = stakeToken.balanceOf(address(this)) -
+            totalStakedBalance;
 
         /**
          * @notice Transfers accumulated reflections to the reflectionsDistributor
          * if the amount is reached
          */
-        if (
-            contractBalanceWReflections > 0 && reflections > minAmountReflection
-        ) {
-            stakeToken.transfer(reflectionsDistributorAddress, reflections);
+        if (reflections > minAmountReflection) {
+            require(
+                stakeToken.transfer(
+                    address(reflectionsDistributor),
+                    reflections
+                ),
+                "Transfer fail"
+            );
         }
+    }
+
+    function deposit(address staker, uint256 amount) external onlyStakingVault {
+        transferReflections();
 
         totalStakedBalance += amount;
 
         reflectionsDistributor.deposit(staker, amount);
-        stakeToken.transferFrom(staker, address(this), amount);
+        require(
+            stakeToken.transferFrom(staker, address(this), amount),
+            "TransferFrom fail"
+        );
         emit LogDeposit(staker, amount);
     }
 
@@ -85,33 +87,13 @@ contract StakingTresuary is Ownable, IStakingTresuary {
         external
         onlyStakingVault
     {
+        transferReflections();
+
         totalStakedBalance -= amount;
-        stakeToken.transfer(staker, amount);
-
-        uint256 contractBalance = getTotalStakedBalance();
-        uint256 contractBalanceWReflections = stakeToken.balanceOf(
-            address(this)
-        );
-
-        /**
-         * @notice Transfers accumulated reflections to the reflectionsDistributor
-         * if the amount is reached
-         */
-        if (
-            contractBalanceWReflections - contractBalance >= minAmountReflection
-        ) {
-            stakeToken.transfer(
-                reflectionsDistributorAddress,
-                minAmountReflection
-            );
-        }
+        require(stakeToken.transfer(staker, amount), "Transfer fail");
 
         reflectionsDistributor.withdraw(staker, amount);
         emit LogWithdrawal(staker, amount);
-    }
-
-    function getTotalStakedBalance() public view returns (uint256) {
-        return totalStakedBalance;
     }
 
     function setStakingVault(address _stakingVault) external onlyOwner {
