@@ -4,10 +4,9 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/IStakingTreasury.sol";
 import "./interfaces/IReflectionsDistributor.sol";
 
-contract StakingTreasury is Ownable, IStakingTreasury {
+contract StakingTreasury is Ownable {
     address public stakingVault;
     uint256 public totalStakedBalance;
     uint256 public minAmountReflection = 1000 * 10**9;

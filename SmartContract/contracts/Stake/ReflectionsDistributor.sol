@@ -24,7 +24,8 @@ contract ReflectionsDistributor is Ownable {
          */
     }
 
-    IERC20 public empire;
+    IERC20 public immutable empire;
+    address public treasury;
 
     /// @dev Internal balance of EMPIRE, this gets updated on user deposits / withdrawals
     /// this allows to reward users with EMPIRE
@@ -42,29 +43,34 @@ contract ReflectionsDistributor is Ownable {
     /// @dev Info of each user that stakes EMPIRE
     mapping(address => UserInfo) private userInfo;
 
-    /// @notice Emitted when a user deposits EMPIRE
     event Deposit(address indexed user, uint256 amount);
-
-    /// @notice Emitted when a user withdraws EMPIRE
     event Withdraw(address indexed user, uint256 amount);
-
-    /// @notice Emitted when a user claims reward
     event ClaimReward(address indexed user, uint256 amount);
+    event LogSetTreasury(address treasury);
 
     /**
      * @param _empire The address of the EMPIRE token
      */
-    constructor(IERC20 _empire) {
+    constructor(IERC20 _empire, address _treasury) {
         empire = _empire;
+        treasury = _treasury;
 
         ACC_REWARD_PER_SHARE_PRECISION = 1e24;
+    }
+
+    modifier onlyTreasury() {
+        require(
+            _msgSender() == treasury,
+            "ReflectionsDistributor: caller is not the treasury"
+        );
+        _;
     }
 
     /**
      * @notice Deposit EMPIRE for reward token allocation
      * @param _amount The amount of EMPIRE to deposit
      */
-    function deposit(address _user, uint256 _amount) external {
+    function deposit(address _user, uint256 _amount) external onlyTreasury {
         UserInfo storage user = userInfo[_user];
 
         uint256 _previousAmount = user.amount;
@@ -91,36 +97,10 @@ contract ReflectionsDistributor is Ownable {
     }
 
     /**
-     * @notice View function to see pending reward token on frontend
-     * @param _user The address of the user
-     * @return `_user`'s pending reward token
-     */
-    function pendingReward(address _user) external view returns (uint256) {
-        UserInfo storage user = userInfo[_user];
-        uint256 _totalEmpire = internalEmpireBalance;
-        uint256 _accRewardTokenPerShare = accRewardPerShare;
-
-        uint256 _currRewardBalance = empire.balanceOf(address(this));
-        uint256 _rewardBalance = _currRewardBalance;
-
-        if (_rewardBalance != lastRewardBalance && _totalEmpire != 0) {
-            uint256 _accruedReward = _rewardBalance - lastRewardBalance;
-            _accRewardTokenPerShare =
-                _accRewardTokenPerShare +
-                (_accruedReward * ACC_REWARD_PER_SHARE_PRECISION) /
-                _totalEmpire;
-        }
-        return
-            (user.amount * _accRewardTokenPerShare) /
-            ACC_REWARD_PER_SHARE_PRECISION -
-            user.rewardDebt;
-    }
-
-    /**
      * @notice Withdraw EMPIRE and harvest the rewards
      * @param _amount The amount of EMPIRE to withdraw
      */
-    function withdraw(address _user, uint256 _amount) external {
+    function withdraw(address _user, uint256 _amount) external onlyTreasury {
         UserInfo storage user = userInfo[_user];
         uint256 _previousAmount = user.amount;
         require(
@@ -153,7 +133,7 @@ contract ReflectionsDistributor is Ownable {
      * @notice Update reward variables
      * @dev Needs to be called before any deposit or withdrawal
      */
-    function updateReward() public {
+    function updateReward() internal {
         uint256 _totalEmpire = internalEmpireBalance;
 
         uint256 _currRewardBalance = empire.balanceOf(address(this));
@@ -192,6 +172,11 @@ contract ReflectionsDistributor is Ownable {
         }
     }
 
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
+        emit LogSetTreasury(treasury);
+    }
+
     /**
      * @notice Get user info
      * @param _user The address of the user
@@ -205,5 +190,31 @@ contract ReflectionsDistributor is Ownable {
     {
         UserInfo storage user = userInfo[_user];
         return (user.amount, user.rewardDebt);
+    }
+
+    /**
+     * @notice View function to see pending reward token on frontend
+     * @param _user The address of the user
+     * @return `_user`'s pending reward token
+     */
+    function pendingReward(address _user) external view returns (uint256) {
+        UserInfo storage user = userInfo[_user];
+        uint256 _totalEmpire = internalEmpireBalance;
+        uint256 _accRewardTokenPerShare = accRewardPerShare;
+
+        uint256 _currRewardBalance = empire.balanceOf(address(this));
+        uint256 _rewardBalance = _currRewardBalance;
+
+        if (_rewardBalance != lastRewardBalance && _totalEmpire != 0) {
+            uint256 _accruedReward = _rewardBalance - lastRewardBalance;
+            _accRewardTokenPerShare =
+                _accRewardTokenPerShare +
+                (_accruedReward * ACC_REWARD_PER_SHARE_PRECISION) /
+                _totalEmpire;
+        }
+        return
+            (user.amount * _accRewardTokenPerShare) /
+            ACC_REWARD_PER_SHARE_PRECISION -
+            user.rewardDebt;
     }
 }
