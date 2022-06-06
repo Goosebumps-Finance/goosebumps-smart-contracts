@@ -30,8 +30,8 @@ before(async function () {
 
     for (let i = 1; i < accountList.length; i++) {
         if (parseFloat(ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address))) < 999) {
-            await expect(stakeToken.connect(accountList[0]).transfer(accountList[i].address, ethers.utils.parseEther("1000")))
-                .to.emit(stakeToken, "Transfer").withArgs(accountList[0].address, accountList[i].address, ethers.utils.parseEther("1000"));
+            await expect(stakeToken.connect(accountList[0]).transfer(accountList[i].address, ethers.utils.parseEther("10000")))
+                .to.emit(stakeToken, "Transfer").withArgs(accountList[0].address, accountList[i].address, ethers.utils.parseEther("10000"));
         }
         console.log("Token balance of %s is %s Stake Token", accountList[i].address, ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address)))
 
