@@ -75,7 +75,7 @@ before(async function () {
     // console.log(accountList.length)
     // for (let i = 0; i < accountList.length; i++)
     //     console.log("## ", accountList[i].address);
-})
+});
 
 describe("GooseBumpsStaking Test", function () {
 
@@ -108,7 +108,7 @@ describe("GooseBumpsStaking Test", function () {
             const setPauseTx = await gooseBumpsStaking.connect(accountList[0]).setPause();
             // wait until the transaction is mined
             await setPauseTx.wait();
-        })
+        });
 
         it("stake fail because contract is paused", async function () {
             const approveTx = await stakeToken.connect(accountList[1]).approve(gooseBumpsStaking.address, ethers.utils.parseEther("100"));
@@ -141,17 +141,17 @@ describe("GooseBumpsStaking Test", function () {
             await approveTx.wait();
             await expect(gooseBumpsStaking.connect(accountList[1]).stake(ethers.utils.parseEther("100")))
                 .to.revertedWith('ERC20: insufficient allowance');
-        })
+        });
 
         it("stake fail because staking amount is zero", async function () {
             await expect(gooseBumpsStaking.connect(accountList[1]).stake(0))
                 .to.revertedWith('Staking amount must be greater than zero');
-        })
+        });
 
         it("stake fail because 'Insufficient stakeToken balance'", async function () {
             await expect(gooseBumpsStaking.connect(accountList[1]).stake(ethers.utils.parseEther("100000")))
                 .to.revertedWith('Insufficient stakeToken balance');
-        })
+        });
 
         it("unstake fail because not approved", async function () {
             let approveTx = await stakeToken.connect(accountList[1]).approve(gooseBumpsStaking.address, ethers.utils.parseEther("100"));
@@ -167,17 +167,17 @@ describe("GooseBumpsStaking Test", function () {
 
             approveTx = await stakeToken.connect(accountList[0]).approve(gooseBumpsStaking.address, ethers.utils.parseEther("100000000000000000000"));
             await approveTx.wait();
-        })
+        });
 
         it("unstake fail because unstaking amount is zero", async function () {
             await expect(gooseBumpsStaking.connect(accountList[1]).unstake(0))
                 .to.revertedWith('Unstaking amount must be greater than zero');
-        })
+        });
 
         it("unstake fail because 'Insufficient unstake'", async function () {
             await expect(gooseBumpsStaking.connect(accountList[1]).unstake(ethers.utils.parseEther("1000")))
                 .to.revertedWith('Insufficient unstake');
-        })
+        });
 
         it("unstake fail because reward wallet not approved", async function () {
             let approveTx = await rewardToken.connect(accountList[0]).approve(gooseBumpsStaking.address, ethers.utils.parseEther("0"));
@@ -185,7 +185,7 @@ describe("GooseBumpsStaking Test", function () {
 
             await expect(gooseBumpsStaking.connect(accountList[1]).unstake(ethers.utils.parseEther("10")))
                 .to.revertedWith('ERC20: insufficient allowance');
-        })
+        });
 
         it("withdrawRewards fail because reward wallet not approved", async function () {
             await expect(gooseBumpsStaking.connect(accountList[1]).withdrawRewards())
@@ -193,8 +193,8 @@ describe("GooseBumpsStaking Test", function () {
 
             let approveTx = await rewardToken.connect(accountList[0]).approve(gooseBumpsStaking.address, ethers.utils.parseEther("100000000000000000000"));
             await approveTx.wait();
-        })
-    })
+        });
+    });
 
     describe("stake and unstake and withdrawRewards success with mutilcase", function () {
         before(async function () {
@@ -203,7 +203,7 @@ describe("GooseBumpsStaking Test", function () {
 
             approveTx = await stakeToken.connect(staker2).approve(gooseBumpsStaking.address, ethers.utils.parseEther("10000"));
             await approveTx.wait();
-        })
+        });
 
         describe("multi-stake and multi-unstake and multi-withdrawRewards success", function () {
             it("stake and stake success with another stakers", async function () {
@@ -256,7 +256,7 @@ describe("GooseBumpsStaking Test", function () {
                 await expect(gooseBumpsStaking.connect(staker1).withdrawRewards())
                     .to.be.emit(gooseBumpsStaking, "LogRewardsWithdrawal");
             });
-        })
+        });
 
         describe("multi-stake-unstake-withdrawRewards success", function () {
             it("stake-unstake-withdrawRewards success with another stakers", async function () {
@@ -284,8 +284,8 @@ describe("GooseBumpsStaking Test", function () {
                 await expect(gooseBumpsStaking.connect(staker2).stake(ethers.utils.parseEther("20")))
                     .to.be.emit(gooseBumpsStaking, "LogStake").withArgs(staker2.address, ethers.utils.parseEther("20"));
             });
-        })
-    })
+        });
+    });
 
     describe("setTreasury Test", function () {
         it("Set success", async function () {
@@ -384,7 +384,7 @@ describe("GooseBumpsStaking Test", function () {
         describe("withdrawETH Test", function () {
             let balance;
             it("withdrawETH success", async function () {
-                const transferETHTx = await accountList[0].sendTransaction({ to: gooseBumpsStaking.address, value: ethers.utils.parseEther("100") })
+                const transferETHTx = await accountList[0].sendTransaction({ to: gooseBumpsStaking.address, value: ethers.utils.parseEther("100") });
                 await transferETHTx.wait();
                 console.log("           transferETHTx hash: ", transferETHTx.hash);
 
