@@ -4,31 +4,22 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/IStakingTresuary.sol";
+import "./interfaces/IStakingTreasury.sol";
 import "./interfaces/IReflectionsDistributor.sol";
 
-contract StakingTresuary is Ownable, IStakingTresuary {
+contract StakingTreasury is Ownable, IStakingTreasury {
     address public stakingVault;
-    uint256 public minAmountReflection = 1000 * 10**9;
     uint256 public totalStakedBalance;
+    uint256 public minAmountReflection = 1000 * 10**9;
 
-    IERC20 public stakeToken;
     IReflectionsDistributor public reflectionsDistributor;
+    IERC20 public immutable stakeToken;
 
     event LogDeposit(address user, uint256 amount);
     event LogWithdrawal(address user, uint256 amount);
     event LogSetStakingVault(address stakingVault);
-    event LogSetStakeToken(address stakeToken);
     event LogSetMinAmountReflection(uint256 minAmountReflection);
     event LogSetReflectionsDistributor(address reflectionsDistributor);
-    event LogReceived(address indexed, uint256);
-    event LogFallback(address indexed, uint256);
-    event LogWithdrawalETH(address indexed recipient, uint256 amount);
-    event LogWithdrawToken(
-        address indexed token,
-        address indexed recipient,
-        uint256 amount
-    );
 
     constructor(
         address _stakingVault,
@@ -101,11 +92,6 @@ contract StakingTresuary is Ownable, IStakingTresuary {
         emit LogSetStakingVault(stakingVault);
     }
 
-    function setStakeToken(IERC20 _stakeToken) external onlyOwner {
-        stakeToken = _stakeToken;
-        emit LogSetStakeToken(address(stakeToken));
-    }
-
     function setMinAmountReflection(uint256 _minAmountReflection)
         external
         onlyOwner
@@ -119,37 +105,5 @@ contract StakingTresuary is Ownable, IStakingTresuary {
     ) external onlyOwner {
         reflectionsDistributor = _reflectionsDistributor;
         emit LogSetReflectionsDistributor(address(reflectionsDistributor));
-    }
-
-    receive() external payable {
-        emit LogReceived(_msgSender(), msg.value);
-    }
-
-    fallback() external payable {
-        emit LogFallback(_msgSender(), msg.value);
-    }
-
-    function withdrawETH(address payable recipient, uint256 amount)
-        external
-        onlyOwner
-    {
-        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
-        (bool success, ) = recipient.call{value: amount}(new bytes(0));
-        require(success, "ETH_TRANSFER_FAILED");
-        emit LogWithdrawalETH(recipient, amount);
-    }
-
-    /**
-     * @notice  Should not be withdrawn scam token.
-     */
-    function withdrawToken(
-        IERC20 token,
-        address recipient,
-        uint256 amount
-    ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
-        require(token.transfer(recipient, amount), "TRANSFER_FAILED");
-
-        emit LogWithdrawToken(address(token), recipient, amount);
     }
 }
