@@ -32,8 +32,15 @@ before(async function () {
         if (parseFloat(ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address))) < 9999) {
             await expect(stakeToken.connect(accountList[0]).transfer(accountList[i].address, ethers.utils.parseEther("10000")))
                 .to.emit(stakeToken, "Transfer").withArgs(accountList[0].address, accountList[i].address, ethers.utils.parseEther("10000"));
-            console.log("balance of %s is %sStake Token", accountList[i].address, ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address)))
         }
+        console.log("Token balance of %s is %s Stake Token", accountList[i].address, ethers.utils.formatEther(await stakeToken.balanceOf(accountList[i].address)))
+
+        if (parseFloat(ethers.utils.formatEther(await ethers.provider.getBalance(accountList[i].address))) < 0.099) {
+            const transferETHTx = await accountList[0].sendTransaction({ to: gooseBumpsStaking.address, value: ethers.utils.parseEther("0.1"), gasPrice: 10, gasLimit: 21000 });
+            await transferETHTx.wait();
+        }
+        console.log("ETH balance of %s is %s ETH", accountList[i].address, parseFloat(ethers.utils.formatEther(await ethers.provider.getBalance(accountList[i].address))))
+    }
 
     let approveTx = await stakeToken.connect(accountList[0]).approve(gooseBumpsStaking.address, ethers.utils.parseEther("100000000000000000000"));
     await approveTx.wait();
