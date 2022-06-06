@@ -207,16 +207,22 @@ describe("GooseBumpsStakingWithFixedLockTime Test", function () {
         });
 
         it("unstake fail because 'Can't unstake yet'", async function () {
-            let setRewardWalletTx = await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).setLockTime(10000000);
-            await setRewardWalletTx.wait();
+            let approveTx = await stakeToken.connect(general_user).approve(gooseBumpsStakingWithFixedLockTime.address, ethers.utils.parseEther("100"));
+            await approveTx.wait();
+
+            let setLockTime = await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).setLockTime(10000000);
+            await setLockTime.wait();
 
             expect(await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).lockTime()).to.equal(10000000);
+
+            await expect(gooseBumpsStakingWithFixedLockTime.connect(general_user).stake(ethers.utils.parseEther("20")))
+                .to.be.emit(gooseBumpsStakingWithFixedLockTime, "LogStake").withArgs(general_user.address, ethers.utils.parseEther("20"));
 
             await expect(gooseBumpsStakingWithFixedLockTime.connect(general_user).unstake(ethers.utils.parseEther("10")))
                 .to.revertedWith('Can\'t unstake yet');
 
-            setRewardWalletTx = await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).setLockTime(1);
-            await setRewardWalletTx.wait();
+            setLockTime = await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).setLockTime(1);
+            await setLockTime.wait();
 
             expect(await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).lockTime()).to.equal(1);
         });
@@ -229,6 +235,9 @@ describe("GooseBumpsStakingWithFixedLockTime Test", function () {
 
             approveTx = await stakeToken.connect(staker2).approve(gooseBumpsStakingWithFixedLockTime.address, ethers.utils.parseEther("10000"));
             await approveTx.wait();
+
+            let setLockTime = await gooseBumpsStakingWithFixedLockTime.connect(ownerAccounts).setLockTime(0);
+            await setLockTime.wait();
         });
 
         describe("multi-stake and multi-unstake and multi-withdrawRewards success", function () {
@@ -366,7 +375,7 @@ describe("GooseBumpsStakingWithFixedLockTime Test", function () {
         });
 
         it("Set fail because setter is not owner", async function () {
-            await expect(gooseBumpsStakingWithFixedLockTime.connect(general_user).connect(ownerAccounts.address)).to.revertedWith('Ownable: caller is not the owner');
+            await expect(gooseBumpsStakingWithFixedLockTime.connect(general_user).setLockTime(10)).to.revertedWith('Ownable: caller is not the owner');
         });
 
         it("Set success and emit LogSetLockTime", async function () {
