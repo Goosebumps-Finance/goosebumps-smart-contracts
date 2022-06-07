@@ -16,8 +16,8 @@ async function main() {
   // We get the contract to deploy
 
   const _stakingVault = "";
-  const _stakeToken = "";
-  const _reflectionsDistributor = "";
+  const _stakeToken = "0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB";
+  const _reflectionsDistributor = "0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB"; //fake
 
   const StakingTreasury = await ethers.getContractFactory("StakingTreasury");
   const stakingTreasury = await StakingTreasury.deploy(_stakingVault, _stakeToken, _reflectionsDistributor);
@@ -25,6 +25,13 @@ async function main() {
   await stakingTreasury.deployed();
 
   console.log("StakingTreasury deployed to:", stakingTreasury.address);
+
+  const _stakingVaultWithLockTIme = "";
+  const stakingTreasuryWithLockTIme = await StakingTreasury.deploy(_stakingVaultWithLockTIme, _stakeToken, _reflectionsDistributor);
+
+  await stakingTreasuryWithLockTIme.deployed();
+
+  console.log("StakingTreasury deployed to:", stakingTreasuryWithLockTIme.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

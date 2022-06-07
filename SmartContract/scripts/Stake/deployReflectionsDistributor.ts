@@ -15,7 +15,7 @@ async function main() {
 
   // We get the contract to deploy
 
-  const _stakeToken = "";
+  const _stakeToken = "0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB";
   const _treasury = "";
 
   const ReflectionsDistributor = await ethers.getContractFactory("ReflectionsDistributor");
