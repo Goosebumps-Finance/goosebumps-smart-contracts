@@ -26,6 +26,7 @@ contract ReflectionsDistributor is Ownable {
 
     IERC20 public immutable empire;
     address public treasury;
+    uint256 public minAmountReflection = 1000 * 10**9;
 
     /// @dev Internal balance of EMPIRE, this gets updated on user deposits / withdrawals
     /// this allows to reward users with EMPIRE
@@ -38,7 +39,7 @@ contract ReflectionsDistributor is Ownable {
     uint256 public accRewardPerShare;
 
     /// @notice The precision of `accRewardPerShare`
-    uint256 public ACC_REWARD_PER_SHARE_PRECISION;
+    uint256 public immutable ACC_REWARD_PER_SHARE_PRECISION;
 
     /// @dev Info of each user that stakes EMPIRE
     mapping(address => UserInfo) private userInfo;
@@ -47,6 +48,7 @@ contract ReflectionsDistributor is Ownable {
     event Withdraw(address indexed user, uint256 amount);
     event ClaimReward(address indexed user, uint256 amount);
     event LogSetTreasury(address treasury);
+    event LogSetMinAmountReflection(uint256 minAmountReflection);
 
     /**
      * @param _empire The address of the EMPIRE token
@@ -86,7 +88,7 @@ contract ReflectionsDistributor is Ownable {
             uint256 _pending = (_previousAmount * accRewardPerShare) /
                 ACC_REWARD_PER_SHARE_PRECISION -
                 _previousRewardDebt;
-            if (_pending != 0) {
+            if (_pending > 0) {
                 safeTokenTransfer(_user, _pending);
                 emit ClaimReward(_user, _pending);
             }
@@ -113,7 +115,7 @@ contract ReflectionsDistributor is Ownable {
         user.rewardDebt =
             (_newAmount * accRewardPerShare) /
             ACC_REWARD_PER_SHARE_PRECISION;
-        if (_pending != 0) {
+        if (_pending > 0) {
             safeTokenTransfer(_user, _pending);
             emit ClaimReward(_user, _pending);
         }
@@ -134,17 +136,18 @@ contract ReflectionsDistributor is Ownable {
         uint256 _rewardBalance = _currRewardBalance;
 
         // Did ReflectionsDistributor receive any token
-        if (_rewardBalance == lastRewardBalance || _totalEmpire == 0) {
-            return;
+        if (
+            _rewardBalance >= lastRewardBalance + minAmountReflection &&
+            _totalEmpire > 0
+        ) {
+            uint256 _accruedReward = _rewardBalance - lastRewardBalance;
+
+            accRewardPerShare =
+                accRewardPerShare +
+                (_accruedReward * ACC_REWARD_PER_SHARE_PRECISION) /
+                _totalEmpire;
+            lastRewardBalance = _rewardBalance;
         }
-
-        uint256 _accruedReward = _rewardBalance - lastRewardBalance;
-
-        accRewardPerShare =
-            accRewardPerShare +
-            (_accruedReward * ACC_REWARD_PER_SHARE_PRECISION) /
-            _totalEmpire;
-        lastRewardBalance = _rewardBalance;
     }
 
     /**
@@ -169,6 +172,14 @@ contract ReflectionsDistributor is Ownable {
     function setTreasury(address _treasury) external onlyOwner {
         treasury = _treasury;
         emit LogSetTreasury(treasury);
+    }
+
+    function setMinAmountReflection(uint256 _minAmountReflection)
+        external
+        onlyOwner
+    {
+        minAmountReflection = _minAmountReflection;
+        emit LogSetMinAmountReflection(minAmountReflection);
     }
 
     /**
