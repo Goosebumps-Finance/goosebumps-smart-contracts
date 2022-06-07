@@ -6,9 +6,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./interfaces/IStakingTreasury.sol";
 
-contract GooseBumpsStakingWithReflection is Ownable, Pausable {
+contract GooseBumpsStakingWithFixedLockTimeAndReflection is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
+        uint256 endTime;
         uint256 startBlock;
         uint256 stakeRewards;
     }
@@ -22,6 +23,8 @@ contract GooseBumpsStakingWithReflection is Ownable, Pausable {
     IERC20 public immutable stakeToken;
     IERC20 public immutable rewardsToken;
 
+    uint256 public lockTime = 30 days;
+
     address public TREASURY;
     address public REWARD_WALLET;
 
@@ -34,6 +37,7 @@ contract GooseBumpsStakingWithReflection is Ownable, Pausable {
     event LogRewardsWithdrawal(address indexed to, uint256 amount);
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
+    event LogSetLockTime(uint256 lockTime);
 
     constructor(
         IERC20 _stakeToken,
@@ -67,10 +71,15 @@ contract GooseBumpsStakingWithReflection is Ownable, Pausable {
         
         staker[msg.sender].amount += _amount;
         staker[msg.sender].startBlock = block.number;
+        staker[msg.sender].endTime = block.timestamp + lockTime;
         emit LogStake(msg.sender, _amount);
     }
 
     function unstake(uint256 _amount) external whenNotPaused {
+        require(
+            block.timestamp > staker[msg.sender].endTime,
+            "Can't unstake yet"
+        );
         require(_amount > 0, "Unstaking amount must be greater than zero");
         require(staker[msg.sender].amount >= _amount, "Insufficient unstake");
 
@@ -123,6 +132,11 @@ contract GooseBumpsStakingWithReflection is Ownable, Pausable {
     function setRewardWallet(address _rewardWallet) external onlyOwner {
         REWARD_WALLET = _rewardWallet;
         emit LogSetRewardWallet(REWARD_WALLET);
+    }
+
+    function setLockTime(uint256 _lockTime) external onlyOwner {
+        lockTime = _lockTime;
+        emit LogSetLockTime(lockTime);
     }
 
     function setPause() external onlyOwner {
