@@ -103,25 +103,19 @@ contract ReflectionsDistributor is Ownable {
     function withdraw(address _user, uint256 _amount) external onlyTreasury {
         UserInfo storage user = userInfo[_user];
         uint256 _previousAmount = user.amount;
-        require(
-            _amount <= _previousAmount,
-            "ReflectionsDistributor: withdraw amount exceeds balance"
-        );
-        uint256 _newAmount = user.amount - (_amount);
+        uint256 _newAmount = user.amount - _amount;
         user.amount = _newAmount;
 
-        if (_previousAmount != 0) {
-            updateReward();
-            uint256 _pending = (_previousAmount * accRewardPerShare) /
-                ACC_REWARD_PER_SHARE_PRECISION -
-                user.rewardDebt;
-            user.rewardDebt =
-                (_newAmount * accRewardPerShare) /
-                ACC_REWARD_PER_SHARE_PRECISION;
-            if (_pending != 0) {
-                safeTokenTransfer(_user, _pending);
-                emit ClaimReward(_user, _pending);
-            }
+        updateReward();
+        uint256 _pending = (_previousAmount * accRewardPerShare) /
+            ACC_REWARD_PER_SHARE_PRECISION -
+            user.rewardDebt;
+        user.rewardDebt =
+            (_newAmount * accRewardPerShare) /
+            ACC_REWARD_PER_SHARE_PRECISION;
+        if (_pending != 0) {
+            safeTokenTransfer(_user, _pending);
+            emit ClaimReward(_user, _pending);
         }
 
         internalEmpireBalance -= _amount;
@@ -165,10 +159,10 @@ contract ReflectionsDistributor is Ownable {
 
         if (_amount > _rewardBalance) {
             lastRewardBalance = lastRewardBalance - _rewardBalance;
-            empire.transfer(_to, _rewardBalance);
+            require(empire.transfer(_to, _rewardBalance), "Transfer fail");
         } else {
             lastRewardBalance = lastRewardBalance - _amount;
-            empire.transfer(_to, _amount);
+            require(empire.transfer(_to, _amount), "Transfer fail");
         }
     }
 
