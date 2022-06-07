@@ -37,14 +37,6 @@ contract GooseBumpsFarmingWithFixedLockTime is Ownable, Pausable {
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
     event LogSetLockTime(uint256 lockTime);
-    event LogReceived(address indexed, uint256);
-    event LogFallback(address indexed, uint256);
-    event LogWithdrawalETH(address indexed recipient, uint256 amount);
-    event LogWithdrawToken(
-        address indexed token,
-        address indexed recipient,
-        uint256 amount
-    );
 
     constructor(
         IERC20 _lpToken,
@@ -158,37 +150,5 @@ contract GooseBumpsFarmingWithFixedLockTime is Ownable, Pausable {
 
     function setUnpause() external onlyOwner {
         _unpause();
-    }
-
-    receive() external payable {
-        emit LogReceived(_msgSender(), msg.value);
-    }
-
-    fallback() external payable {
-        emit LogFallback(_msgSender(), msg.value);
-    }
-
-    function withdrawETH(address payable recipient, uint256 amount)
-        external
-        onlyOwner
-    {
-        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
-        (bool success, ) = recipient.call{value: amount}(new bytes(0));
-        require(success, "ETH_TRANSFER_FAILED");
-        emit LogWithdrawalETH(recipient, amount);
-    }
-
-    /**
-     * @notice  Should not be withdrawn scam token.
-     */
-    function withdrawToken(
-        IERC20 token,
-        address recipient,
-        uint256 amount
-    ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
-        require(token.transfer(recipient, amount), "TRANSFER_FAILED");
-
-        emit LogWithdrawToken(address(token), recipient, amount);
     }
 }
