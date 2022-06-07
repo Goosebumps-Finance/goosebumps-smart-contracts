@@ -16,7 +16,7 @@ async function main() {
   // We get the contract to deploy
 
   const _stakeToken = "0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB";
-  const _treasury = "";
+  const _treasury = "0x1ec8081765DC8be426B2020ac70534ee59797199"; // GooseBumpsStakingWithReflection
 
   const ReflectionsDistributor = await ethers.getContractFactory("ReflectionsDistributor");
   const reflectionsDistributor = await ReflectionsDistributor.deploy(_stakeToken, _treasury);
@@ -24,6 +24,14 @@ async function main() {
   await reflectionsDistributor.deployed();
 
   console.log("ReflectionsDistributor deployed to:", reflectionsDistributor.address);
+
+  const _treasuryWithLockTIme = "0xD34a1237cC5A8794c3E14479d8DbB20765F4803B"; // GooseBumpsStakingWithFixedLockTimeAndReflection
+
+  const reflectionsDistributorWithLockTIme = await ReflectionsDistributor.deploy(_stakeToken, _treasuryWithLockTIme);
+
+  await reflectionsDistributorWithLockTIme.deployed();
+
+  console.log("ReflectionsDistributor deployed to:", reflectionsDistributorWithLockTIme.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

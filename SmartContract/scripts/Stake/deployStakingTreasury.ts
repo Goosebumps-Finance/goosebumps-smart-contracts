@@ -15,7 +15,7 @@ async function main() {
 
   // We get the contract to deploy
 
-  const _stakingVault = "0xc8Cd7f525469e62430a1833F2DdD299EDC026c88";
+  const _stakingVault = "0xE689ff389d394c49B2C88A84a4605aB6d9148aEa"; // GooseBumpsStakingWithReflection
   const _stakeToken = "0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB";
   const _reflectionsDistributor = "0x62dD0864C5B85A97045BC841764f449Cdb8ac6bB"; //fake
 
