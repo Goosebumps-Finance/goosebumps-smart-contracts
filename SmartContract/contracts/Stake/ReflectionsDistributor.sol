@@ -11,12 +11,12 @@ contract ReflectionsDistributor is Ownable {
         uint256 amount;
         uint256 rewardDebt;
         /**
-         * @notice We do some fancy math here. Basically, any point in time, the amount of EMPIREs
+         * @notice We do some fancy math here. Basically, any point in time, the amount of STAKE_TOKENs
          * entitled to a user but is pending to be distributed is:
          *
          *   pending reward = (user.amount * accRewardPerShare) - user.rewardDebt
          *
-         * Whenever a user deposits or withdraws EMPIRE. Here's what happens:
+         * Whenever a user deposits or withdraws STAKE_TOKEN. Here's what happens:
          *   1. accRewardPerShare (and `lastRewardBalance`) gets updated
          *   2. User receives the pending reward sent to his/her address
          *   3. User's `amount` gets updated
@@ -24,12 +24,15 @@ contract ReflectionsDistributor is Ownable {
          */
     }
 
-    IERC20 public immutable empire;
+    IERC20 public immutable stakeToken;
     address public treasury;
     uint256 public minAmountReflection = 1000 * 10**9;
 
-    /// @dev Internal balance of EMPIRE, this gets updated on user deposits / withdrawals
-    /// this allows to reward users with EMPIRE
+    /// @notice The precision of `accRewardPerShare`
+    uint256 public immutable ACC_REWARD_PER_SHARE_PRECISION;
+
+    /// @dev Internal balance of STAKE_TOKEN, this gets updated on user deposits / withdrawals
+    /// this allows to reward users with STAKE_TOKEN
     uint256 public internalEmpireBalance;
 
     /// @notice Last reward balance
@@ -38,10 +41,7 @@ contract ReflectionsDistributor is Ownable {
     /// @notice Accumulated rewards per share, scaled to `ACC_REWARD_PER_SHARE_PRECISION`
     uint256 public accRewardPerShare;
 
-    /// @notice The precision of `accRewardPerShare`
-    uint256 public immutable ACC_REWARD_PER_SHARE_PRECISION;
-
-    /// @dev Info of each user that stakes EMPIRE
+    /// @dev Info of each user that stakes STAKE_TOKEN
     mapping(address => UserInfo) private userInfo;
 
     event Deposit(address indexed user, uint256 amount);
@@ -51,10 +51,10 @@ contract ReflectionsDistributor is Ownable {
     event LogSetMinAmountReflection(uint256 minAmountReflection);
 
     /**
-     * @param _empire The address of the EMPIRE token
+     * @param _stakeToken The address of the STAKE_TOKEN token
      */
-    constructor(IERC20 _empire, address _treasury) {
-        empire = _empire;
+    constructor(IERC20 _stakeToken, address _treasury) {
+        stakeToken = _stakeToken;
         treasury = _treasury;
 
         ACC_REWARD_PER_SHARE_PRECISION = 1e24;
@@ -69,8 +69,8 @@ contract ReflectionsDistributor is Ownable {
     }
 
     /**
-     * @notice Deposit EMPIRE for reward token allocation
-     * @param _amount The amount of EMPIRE to deposit
+     * @notice Deposit STAKE_TOKEN for reward token allocation
+     * @param _amount The amount of STAKE_TOKEN to deposit
      */
     function deposit(address _user, uint256 _amount) external onlyTreasury {
         UserInfo storage user = userInfo[_user];
@@ -99,11 +99,12 @@ contract ReflectionsDistributor is Ownable {
     }
 
     /**
-     * @notice Withdraw EMPIRE and harvest the rewards
-     * @param _amount The amount of EMPIRE to withdraw
+     * @notice Withdraw STAKE_TOKEN and harvest the rewards
+     * @param _amount The amount of STAKE_TOKEN to withdraw
      */
     function withdraw(address _user, uint256 _amount) external onlyTreasury {
         UserInfo storage user = userInfo[_user];
+
         uint256 _previousAmount = user.amount;
         uint256 _newAmount = user.amount - _amount;
         user.amount = _newAmount;
@@ -132,7 +133,7 @@ contract ReflectionsDistributor is Ownable {
     function updateReward() internal {
         uint256 _totalEmpire = internalEmpireBalance;
 
-        uint256 _currRewardBalance = empire.balanceOf(address(this));
+        uint256 _currRewardBalance = stakeToken.balanceOf(address(this));
         uint256 _rewardBalance = _currRewardBalance;
 
         // Did ReflectionsDistributor receive any token
@@ -157,15 +158,15 @@ contract ReflectionsDistributor is Ownable {
      * @param _amount The amount to send to `_to`
      */
     function safeTokenTransfer(address _to, uint256 _amount) internal {
-        uint256 _currRewardBalance = empire.balanceOf(address(this));
+        uint256 _currRewardBalance = stakeToken.balanceOf(address(this));
         uint256 _rewardBalance = _currRewardBalance;
 
         if (_amount > _rewardBalance) {
             lastRewardBalance = lastRewardBalance - _rewardBalance;
-            require(empire.transfer(_to, _rewardBalance), "Transfer fail");
+            require(stakeToken.transfer(_to, _rewardBalance), "Transfer fail");
         } else {
             lastRewardBalance = lastRewardBalance - _amount;
-            require(empire.transfer(_to, _amount), "Transfer fail");
+            require(stakeToken.transfer(_to, _amount), "Transfer fail");
         }
     }
 
@@ -185,7 +186,7 @@ contract ReflectionsDistributor is Ownable {
     /**
      * @notice Get user info
      * @param _user The address of the user
-     * @return The amount of EMPIRE user has deposited
+     * @return The amount of STAKE_TOKEN user has deposited
      * @return The reward debt for the chosen token
      */
     function getUserInfo(address _user)
@@ -207,10 +208,13 @@ contract ReflectionsDistributor is Ownable {
         uint256 _totalEmpire = internalEmpireBalance;
         uint256 _accRewardTokenPerShare = accRewardPerShare;
 
-        uint256 _currRewardBalance = empire.balanceOf(address(this));
+        uint256 _currRewardBalance = stakeToken.balanceOf(address(this));
         uint256 _rewardBalance = _currRewardBalance;
 
-        if (_rewardBalance != lastRewardBalance && _totalEmpire != 0) {
+        if (
+            _rewardBalance >= lastRewardBalance + minAmountReflection &&
+            _totalEmpire > 0
+        ) {
             uint256 _accruedReward = _rewardBalance - lastRewardBalance;
             _accRewardTokenPerShare =
                 _accRewardTokenPerShare +

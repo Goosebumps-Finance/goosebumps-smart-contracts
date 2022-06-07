@@ -49,7 +49,7 @@ contract StakingTreasury is Ownable {
          * @notice Transfers accumulated reflections to the reflectionsDistributor
          * if the amount is reached
          */
-        if (reflections > minAmountReflection) {
+        if (reflections >= minAmountReflection) {
             require(
                 stakeToken.transfer(
                     address(reflectionsDistributor),
@@ -63,13 +63,14 @@ contract StakingTreasury is Ownable {
     function deposit(address staker, uint256 amount) external onlyStakingVault {
         transferReflections();
 
-        totalStakedBalance += amount;
-
-        reflectionsDistributor.deposit(staker, amount);
         require(
             stakeToken.transferFrom(staker, address(this), amount),
             "TransferFrom fail"
         );
+        totalStakedBalance += amount;
+
+        reflectionsDistributor.deposit(staker, amount);
+
         emit LogDeposit(staker, amount);
     }
 
@@ -79,8 +80,8 @@ contract StakingTreasury is Ownable {
     {
         transferReflections();
 
-        totalStakedBalance -= amount;
         require(stakeToken.transfer(staker, amount), "Transfer fail");
+        totalStakedBalance -= amount;
 
         reflectionsDistributor.withdraw(staker, amount);
         emit LogWithdrawal(staker, amount);
