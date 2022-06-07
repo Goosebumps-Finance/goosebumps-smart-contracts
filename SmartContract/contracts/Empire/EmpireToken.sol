@@ -138,15 +138,15 @@ contract EmpireToken is IERC20, Ownable {
         address indexed setter,
         address marketingWallet
     );
+    event LogSetLiquidityWallet(
+        address indexed setter,
+        address liquidityWallet
+    );
     event LogSetBurnWallet(address indexed setter, address burnWallet);
     event LogSetTeamWallet(address indexed setter, address teamWallet);
     event LogSetBuyFees(address indexed setter, BuyFee buyFee);
     event LogSetSellFees(address indexed setter, SellFee sellFee);
     event LogSetRouterAddress(address indexed setter, address router);
-    event LogUpdateLiquidityWallet(
-        address indexed setter,
-        address liquidityWallet
-    );
     event LogWithdrawalETH(address indexed recipient, uint256 amount);
     event LogWithdrawToken(
         address indexed token,
@@ -318,18 +318,6 @@ contract EmpireToken is IERC20, Ownable {
         return true;
     }
 
-    function isExcludedFromReward(address account)
-        external
-        view
-        returns (bool)
-    {
-        return _isExcluded[account];
-    }
-
-    function totalFees() external view returns (uint256) {
-        return _tFeeTotal;
-    }
-
     function deliver(uint256 tAmount) external {
         address sender = _msgSender();
         require(
@@ -370,32 +358,6 @@ contract EmpireToken is IERC20, Ownable {
         );
         uint256 currentRate = _getRate();
         return rAmount / currentRate;
-    }
-
-    function excludeFromReward(address account) external onlyOwner {
-        require(!_isExcluded[account], "Account is already excluded");
-        if (_rOwned[account] > 0) {
-            _tOwned[account] = tokenFromReflection(_rOwned[account]);
-        }
-        _isExcluded[account] = true;
-        _excluded.push(account);
-
-        emit LogExcludeFromReward(account);
-    }
-
-    function includeInReward(address account) external onlyOwner {
-        require(_isExcluded[account], "Account is already included");
-        for (uint256 i = 0; i < _excluded.length; i++) {
-            if (_excluded[i] == account) {
-                _excluded[i] = _excluded[_excluded.length - 1];
-                _tOwned[account] = 0;
-                _isExcluded[account] = false;
-                _excluded.pop();
-                break;
-            }
-        }
-
-        emit LogIncludeInReward(account);
     }
 
     receive() external payable {
@@ -596,16 +558,6 @@ contract EmpireToken is IERC20, Ownable {
         _teamFee = sellFee.team;
     }
 
-    function setEnableTrading(bool enable) external onlyOwner {
-        isTradingEnabled = enable;
-
-        emit LogSetEnableTrading(isTradingEnabled);
-    }
-
-    function isExcludedFromFee(address account) external view returns (bool) {
-        return _isExcludedFromFee[account];
-    }
-
     function _approve(
         address owner,
         address spender,
@@ -624,7 +576,7 @@ contract EmpireToken is IERC20, Ownable {
         uint256 amount
     ) private {
         require(from != address(0), "ERC20: transfer from the zero address");
-        require(amount > 0, "Transfer amount must be greater than zero");
+        require(to != address(0), "ERC20: transfer to the zero address");
 
         uint256 contractTokenBalance = balanceOf(address(this));
         bool overMinTokenBalance = contractTokenBalance >=
@@ -907,6 +859,22 @@ contract EmpireToken is IERC20, Ownable {
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
+    function isExcludedFromReward(address account)
+        external
+        view
+        returns (bool)
+    {
+        return _isExcluded[account];
+    }
+
+    function totalFees() external view returns (uint256) {
+        return _tFeeTotal;
+    }
+
+    function isExcludedFromFee(address account) external view returns (bool) {
+        return _isExcludedFromFee[account];
+    }
+
     function setExcludeFromFee(address account, bool enabled)
         external
         onlyOwner
@@ -928,6 +896,18 @@ contract EmpireToken is IERC20, Ownable {
     function setTeamWallet(address newWallet) external onlyOwner {
         teamWallet = newWallet;
         emit LogSetTeamWallet(msg.sender, teamWallet);
+    }
+
+    function setLiquidityWallet(address newLiquidityWallet) external onlyOwner {
+        liquidityWallet = newLiquidityWallet;
+
+        emit LogSetLiquidityWallet(msg.sender, newLiquidityWallet);
+    }
+
+    function setEnableTrading(bool enable) external onlyOwner {
+        isTradingEnabled = enable;
+
+        emit LogSetEnableTrading(isTradingEnabled);
     }
 
     function setBuyFees(
@@ -989,24 +969,37 @@ contract EmpireToken is IERC20, Ownable {
         emit LogSetSwapTokensAmount(msg.sender, amount);
     }
 
-    function updateLiquidityWallet(address newLiquidityWallet)
-        external
-        onlyOwner
-    {
-        require(
-            newLiquidityWallet != liquidityWallet,
-            "The liquidity wallet is already this address"
-        );
-        liquidityWallet = newLiquidityWallet;
+    function excludeFromReward(address account) external onlyOwner {
+        require(!_isExcluded[account], "Account is already excluded");
+        if (_rOwned[account] > 0) {
+            _tOwned[account] = tokenFromReflection(_rOwned[account]);
+        }
+        _isExcluded[account] = true;
+        _excluded.push(account);
 
-        emit LogUpdateLiquidityWallet(msg.sender, newLiquidityWallet);
+        emit LogExcludeFromReward(account);
+    }
+
+    function includeInReward(address account) external onlyOwner {
+        require(_isExcluded[account], "Account is already included");
+        for (uint256 i = 0; i < _excluded.length; i++) {
+            if (_excluded[i] == account) {
+                _excluded[i] = _excluded[_excluded.length - 1];
+                _tOwned[account] = 0;
+                _isExcluded[account] = false;
+                _excluded.pop();
+                break;
+            }
+        }
+
+        emit LogIncludeInReward(account);
     }
 
     function withdrawETH(address payable recipient, uint256 amount)
         external
         onlyOwner
     {
-        require(amount <= (address(this)).balance, "Incufficient funds");
+        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
         recipient.transfer(amount);
         emit LogWithdrawalETH(recipient, amount);
     }
@@ -1020,7 +1013,7 @@ contract EmpireToken is IERC20, Ownable {
         address recipient,
         uint256 amount
     ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "Incufficient funds");
+        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
         require(token.transfer(recipient, amount), "Transfer Fail");
 
         emit LogWithdrawToken(address(token), recipient, amount);
@@ -1030,6 +1023,7 @@ contract EmpireToken is IERC20, Ownable {
      * @notice  The onlyOwner will withdraw this token to `recipient`.
      */
     function withdraw(address recipient, uint256 tAmount) external onlyOwner {
+        require(recipient != address(0), "ERC20: transfer to the zero address");
         require(tAmount > 0, "Withdrawal amount must be greater than zero");
 
         if (_isExcluded[address(this)] && !_isExcluded[recipient]) {
@@ -1062,7 +1056,8 @@ contract EmpireToken is IERC20, Ownable {
         address to,
         uint256 tAmount
     ) external onlyBridge {
-        require(from != address(0), "Zero address");
+        require(from != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
         require(tAmount > 0, "Lock amount must be greater than zero");
 
         if (_isExcluded[from] && !_isExcluded[to]) {
