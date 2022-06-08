@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./DEX/interfaces/IGooseBumpsSwapRouter02.sol";
@@ -33,7 +31,8 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
     event LogSetSwapFee(address indexed, uint256);
     event LogSetSwapFee0x(address indexed, uint256);
     event LogSetDexRouter(address indexed, address indexed);
-    event LogWithdraw(address indexed, uint256, uint256);
+    event LogWithdrawalETH(address indexed, uint256);
+    event LogWithdrawToken(address indexed, address indexed, uint256);
     event LogSwapExactTokensForTokens(address indexed, address indexed, uint256, uint256);
     event LogSwapExactETHForTokens(address indexed, uint256, uint256);
     event LogSwapExactTokenForETH(address indexed, uint256, uint256);
@@ -388,20 +387,30 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
 
         emit LogSwapExactTokenForETHOn0x(token, _amountIn, boughtAmount);
     }
-    
-    function withdraw(address token) external onlyOwner nonReentrant {
-        require(IERC20(token).balanceOf(address(this)) > 0 || address(this).balance > 0, "Zero Balance!");
 
-        if(address(this).balance > 0) {
-            payable(_msgSender()).transfer(address(this).balance);
-        }
-        
-        uint256 balance = IERC20(token).balanceOf(address(this));
-        if(balance > 0) {
-            require(IERC20(token).transfer(_msgSender(), balance), "Faild Transfer");
-        }
-        
-        emit LogWithdraw(_msgSender(), balance, address(this).balance);
+    function withdrawETH(address payable recipient, uint256 amount)
+        external
+        onlyOwner
+    {
+        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
+        recipient.transfer(amount);
+
+        emit LogWithdrawalETH(recipient, amount);
+    }
+
+    /**
+     * @notice  Should not be withdrawn scam token or this Empire token.
+     *          Use `withdraw` function to withdraw this Empire token.
+     */
+    function withdrawToken(
+        IERC20 token,
+        address recipient,
+        uint256 amount
+    ) external onlyOwner {
+        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
+        require(token.transfer(recipient, amount), "Transfer Fail");
+
+        emit LogWithdrawToken(address(token), recipient, amount);
     }
 
     receive() external payable {
