@@ -119,6 +119,11 @@ const config: HardhatUserConfig = {
         passphrase: "",
       },
     },
+    bsc_Empire: {
+      url: process.env.BSC_URL || "",
+      accounts:
+        process.env.BSC_EMPIRE_PRIVATE_KEY !== undefined ? [process.env.BSC_EMPIRE_PRIVATE_KEY] : [],
+    },
     bsctestnet: {
       url: process.env.BSCTESTNET_URL || "",
       accounts: {

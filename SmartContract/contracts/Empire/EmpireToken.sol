@@ -170,13 +170,14 @@ contract EmpireToken is IERC20, Ownable {
     constructor(
         address _router,
         address _marketingWallet,
-        address _teamWallet
+        address _teamWallet,
+        address _liquidityWallet
     ) {
         _rOwned[_msgSender()] = _rTotal;
 
         marketingWallet = _marketingWallet;
         burnWallet = address(0xdead);
-        liquidityWallet = owner();
+        liquidityWallet = _liquidityWallet;
         teamWallet = _teamWallet;
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_router);
