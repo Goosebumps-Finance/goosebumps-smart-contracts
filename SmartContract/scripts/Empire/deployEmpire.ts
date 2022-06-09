@@ -42,7 +42,7 @@ async function main() {
   const _teamWallet = "0x69563591018Ae4291710896A482936df51f31Fb9";
   const _liquidityWallet = "0xfB3b7AFC05374080060a9c0bfd7E4a23f534Cca4";
   
-  const EmpireToken = await ethers.getContractFactory("EmpireToken");
+  const EmpireToken = await ethers.getContractFactory("Empire");
   const empireToken = await EmpireToken.deploy(_router, _marketingWallet, _teamWallet, _liquidityWallet);
   
   await empireToken.deployed();
