@@ -37,24 +37,11 @@ async function main() {
   // console.log("Empire deployed to:", empire.address);
 
   // Roburna testnet
-  const _router = "0x1dc6b36afE2C71042CfA07314330C7fdCC6dF40b";
-  const _marketingWallet = "0x90be9043A6603c0458dfbD4a1442372C599DC777";
-  const _teamWallet = "0x3Cc26212500aA1BB56321f1af536Ee13C99CB97B";
-  const _liquidityWallet = "0x66B0beacE85679Cafb5b2547E4D12dF1011285C9";
+  // const _router = "0x1dc6b36afE2C71042CfA07314330C7fdCC6dF40b";
+  // const _marketingWallet = "0x90be9043A6603c0458dfbD4a1442372C599DC777";
+  // const _teamWallet = "0x3Cc26212500aA1BB56321f1af536Ee13C99CB97B";
+  // const _liquidityWallet = "0x66B0beacE85679Cafb5b2547E4D12dF1011285C9";
 
-  const Empire = await ethers.getContractFactory("Empire");
-  const empire = await Empire.deploy(_router, _marketingWallet, _teamWallet, _liquidityWallet);
-  
-  await empire.deployed();
-  
-  console.log("Empire deployed to:", empire.address);
-
-  // BSC mainnet to deploy latest version
-  // const _router = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
-  // const _marketingWallet = "0x7b72c66922170026B1f2cB761E1Db1795135fFcc";
-  // const _teamWallet = "0x69563591018Ae4291710896A482936df51f31Fb9";
-  // const _liquidityWallet = "0xfB3b7AFC05374080060a9c0bfd7E4a23f534Cca4";
-  
   // const Empire = await ethers.getContractFactory("Empire");
   // const empire = await Empire.deploy(_router, _marketingWallet, _teamWallet, _liquidityWallet);
   
@@ -62,12 +49,25 @@ async function main() {
   
   // console.log("Empire deployed to:", empire.address);
 
-  // const _ownerWallet = "0x756625662E6cDE375Ae77e01938F87274a64Efcd";
+  // BSC mainnet to deploy latest version
+  const _router = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
+  const _marketingWallet = "0x7b72c66922170026B1f2cB761E1Db1795135fFcc";
+  const _teamWallet = "0x69563591018Ae4291710896A482936df51f31Fb9";
+  const _liquidityWallet = "0xfB3b7AFC05374080060a9c0bfd7E4a23f534Cca4";
   
-  // const tx = await empire.transferOwnership(_ownerWallet);
+  const Empire = await ethers.getContractFactory("Empire");
+  const empire = await Empire.deploy(_router, _marketingWallet, _teamWallet, _liquidityWallet);
+  
+  await empire.deployed();
+  
+  console.log("Empire deployed to:", empire.address);
 
-  // const txResult = await tx.wait();
-  // console.log("transferOwnership txHash: ", txResult.transactionHash);
+  const _ownerWallet = "0x756625662E6cDE375Ae77e01938F87274a64Efcd";
+  
+  const tx = await empire.transferOwnership(_ownerWallet);
+
+  const txResult = await tx.wait();
+  console.log("transferOwnership txHash: ", txResult.transactionHash);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
