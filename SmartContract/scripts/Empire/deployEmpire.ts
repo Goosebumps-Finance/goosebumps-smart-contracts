@@ -68,6 +68,11 @@ async function main() {
 
   const txResult = await tx.wait();
   console.log("transferOwnership txHash: ", txResult.transactionHash);
+
+  console.log("_marketingWallet: ", _marketingWallet)
+  console.log("_teamWallet: ", _teamWallet)
+  console.log("_liquidityWallet: ", _liquidityWallet)
+  console.log("_ownerWallet: ", _ownerWallet)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
