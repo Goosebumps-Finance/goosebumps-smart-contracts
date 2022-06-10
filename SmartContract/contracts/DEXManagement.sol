@@ -433,28 +433,28 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         _unpause();
     }
 
-    function setTreasury(address _newTreasury) external onlyOwner whenNotPaused {
+    function setTreasury(address _newTreasury) external onlyOwner {
         require(TREASURY != _newTreasury, "Same address! Notice: Must be Multi-sig Wallet!");
         TREASURY = _newTreasury;
 
         emit LogSetTreasury(_msgSender(), TREASURY);
     }
 
-    function setSwapFee(uint256 _newSwapFee) external onlyOwner whenNotPaused {
+    function setSwapFee(uint256 _newSwapFee) external onlyOwner {
         require(SWAP_FEE != _newSwapFee, "Same value!");
         SWAP_FEE = _newSwapFee;
 
         emit LogSetSwapFee(_msgSender(), SWAP_FEE);
     }
 
-    function setSwapFee0x(uint256 _newSwapFee0x) external onlyOwner whenNotPaused {
+    function setSwapFee0x(uint256 _newSwapFee0x) external onlyOwner {
         require(SWAP_FEE_0X != _newSwapFee0x, "Same value!");
         SWAP_FEE_0X = _newSwapFee0x;
 
         emit LogSetSwapFee0x(_msgSender(), SWAP_FEE_0X);
     }
 
-    function setDexRouter(address _newRouter) external onlyOwner whenNotPaused {
+    function setDexRouter(address _newRouter) external onlyOwner {
         require(address(dexRouter_) != _newRouter, "Same router!");
         dexRouter_ = IGooseBumpsSwapRouter02(_newRouter);
         
