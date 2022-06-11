@@ -16,8 +16,9 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
     //--------------------------------------
 
     address public TREASURY;                // Must be multi-sig wallet or Treasury contract
-    uint256 public SWAP_FEE;                // Fee = SWAP_FEE / 10000
-    uint256 public SWAP_FEE_0X;             // Fee = SWAP_FEE_0X / 10000
+    uint256 public SWAP_FEE;                // Fee = SWAP_FEE / FEE_DENOMINATOR
+    uint256 public SWAP_FEE_0X;             // Fee = SWAP_FEE_0X / FEE_DENOMINATOR
+    uint256 public FEE_DENOMINATOR = 10000;
 
     IGooseBumpsSwapRouter02 public dexRouter_;
 
@@ -102,7 +103,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
             path[1] = dexRouter_.WETH();
             path[2] = tokenOut;
         }
-        uint256[] memory amountOutMaxs = dexRouter_.getAmountsOut(_amountIn * (10000 - SWAP_FEE) / 10000, path);
+        uint256[] memory amountOutMaxs = dexRouter_.getAmountsOut(_amountIn * (FEE_DENOMINATOR - SWAP_FEE) / FEE_DENOMINATOR, path);
         return amountOutMaxs[path.length - 1];  
     }
 
@@ -130,7 +131,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
             path[2] = tokenOut;
         }
         uint256[] memory amountInMins = dexRouter_.getAmountsIn(_amountOut, path);
-        return amountInMins[0] * 10000 / (10000 - SWAP_FEE);
+        return amountInMins[0] * FEE_DENOMINATOR / (FEE_DENOMINATOR - SWAP_FEE);
     }
 
     /**
@@ -155,7 +156,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
 
         require(IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
 
-        uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE) / 10000;
+        uint256 _swapAmountIn = _amountIn * (FEE_DENOMINATOR - SWAP_FEE) / FEE_DENOMINATOR;
         
         require(IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn));
 
@@ -214,7 +215,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         require(address(swapTarget) != address(0), "Zero address");
 
         require(IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
-        uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
+        uint256 _swapAmountIn = _amountIn * (FEE_DENOMINATOR - SWAP_FEE_0X) / FEE_DENOMINATOR;
         
         require(IERC20(tokenA).approve(spender, _swapAmountIn));
         
@@ -252,7 +253,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         path[0] = dexRouter_.WETH();
         path[1] = token;
 
-        uint256 _swapAmountIn = msg.value * (10000 - SWAP_FEE) / 10000;
+        uint256 _swapAmountIn = msg.value * (FEE_DENOMINATOR - SWAP_FEE) / FEE_DENOMINATOR;
 
         uint256 boughtAmount = IERC20(token).balanceOf(to);
         dexRouter_.swapExactETHForTokensSupportingFeeOnTransferTokens{value: _swapAmountIn}(                
@@ -287,7 +288,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         require(msg.value > 0 , "Invalid amount");
         require(address(swapTarget) != address(0), "Zero address");
 
-        uint256 _swapAmountIn = msg.value * (10000 - SWAP_FEE_0X) / 10000;
+        uint256 _swapAmountIn = msg.value * (FEE_DENOMINATOR - SWAP_FEE_0X) / FEE_DENOMINATOR;
         
         uint256 boughtAmount = IERC20(token).balanceOf(address(this));
 
@@ -326,7 +327,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         path[1] = dexRouter_.WETH();
         
         require(IERC20(token).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
-        uint256 _swapAmountIn = _amountIn * (10000 -  SWAP_FEE) / 10000;
+        uint256 _swapAmountIn = _amountIn * (FEE_DENOMINATOR -  SWAP_FEE) / FEE_DENOMINATOR;
         
         require(IERC20(token).approve(address(dexRouter_), _swapAmountIn));
 
@@ -370,7 +371,7 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         require(to != address(0), "'to' is Zero address");
 
         require(IERC20(token).transferFrom(_msgSender(), address(this), _amountIn), "Faild TransferFrom");
-        uint256 _swapAmountIn = _amountIn * (10000 - SWAP_FEE_0X) / 10000;
+        uint256 _swapAmountIn = _amountIn * (FEE_DENOMINATOR - SWAP_FEE_0X) / FEE_DENOMINATOR;
         
         require(IERC20(token).approve(spender, _swapAmountIn));
         
