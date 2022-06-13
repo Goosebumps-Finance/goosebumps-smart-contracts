@@ -32,8 +32,6 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
     event LogSetSwapFee(address indexed, uint256);
     event LogSetSwapFee0x(address indexed, uint256);
     event LogSetDexRouter(address indexed, address indexed);
-    event LogWithdrawalETH(address indexed, uint256);
-    event LogWithdrawToken(address indexed, address indexed, uint256);
     event LogSwapExactTokensForTokens(address indexed, address indexed, uint256, uint256);
     event LogSwapExactETHForTokens(address indexed, uint256, uint256);
     event LogSwapExactTokenForETH(address indexed, uint256, uint256);
@@ -387,31 +385,6 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
         require(IERC20(token).transfer(TREASURY, _amountIn - _swapAmountIn), "Faild Transfer");
 
         emit LogSwapExactTokenForETHOn0x(token, _amountIn, boughtAmount);
-    }
-
-    function withdrawETH(address payable recipient, uint256 amount)
-        external
-        onlyOwner
-    {
-        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
-        recipient.transfer(amount);
-
-        emit LogWithdrawalETH(recipient, amount);
-    }
-
-    /**
-     * @notice  Should not be withdrawn scam token or this Empire token.
-     *          Use `withdraw` function to withdraw this Empire token.
-     */
-    function withdrawToken(
-        IERC20 token,
-        address recipient,
-        uint256 amount
-    ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
-        require(token.transfer(recipient, amount), "Transfer Fail");
-
-        emit LogWithdrawToken(address(token), recipient, amount);
     }
 
     receive() external payable {
