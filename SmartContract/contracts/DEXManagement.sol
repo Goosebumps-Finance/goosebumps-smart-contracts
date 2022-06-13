@@ -182,48 +182,35 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @param   tokenA: InputToken Address to swap on GooseBumps
-     * @param   tokenB: OutputToken Address to swap on GooseBumps
      * @param   _amountIn: Amount of InputToken to swap on GooseBumps
      * @param   _amountOutMin: The minimum amount of output tokens that must be received for the transaction not to revert.
+     * @param   path: Swappath on Goosebumps
      * @param   to: Recipient of the output tokens.
      * @param   deadline: Deadline, Timestamp after which the transaction will revert.
      * @notice  Swap ERC20 token to ERC20 token on GooseBumps
      */
     function swapExactTokensForTokens(
-        address tokenA,
-        address tokenB,
         uint256 _amountIn,
         uint256 _amountOutMin,
+        address[] calldata path,
         address to,
         uint256 deadline
     ) external whenNotPaused nonReentrant {
-        require(isPathExists(tokenA, tokenB), "Invalid path");
-        require(_amountIn > 0, "Invalid amount");
-
         require(
-            IERC20(tokenA).transferFrom(_msgSender(), address(this), _amountIn),
+            IERC20(path[0]).transferFrom(
+                _msgSender(),
+                address(this),
+                _amountIn
+            ),
             "Faild TransferFrom"
         );
 
         uint256 _swapAmountIn = (_amountIn * (FEE_DENOMINATOR - SWAP_FEE)) /
             FEE_DENOMINATOR;
 
-        require(IERC20(tokenA).approve(address(dexRouter_), _swapAmountIn));
+        require(IERC20(path[0]).approve(address(dexRouter_), _swapAmountIn));
 
-        address[] memory path;
-        if (isPairExists(tokenA, tokenB)) {
-            path = new address[](2);
-            path[0] = tokenA;
-            path[1] = tokenB;
-        } else {
-            path = new address[](3);
-            path[0] = tokenA;
-            path[1] = dexRouter_.WETH();
-            path[2] = tokenB;
-        }
-
-        uint256 boughtAmount = IERC20(tokenB).balanceOf(to);
+        uint256 boughtAmount = IERC20(path[path.length - 1]).balanceOf(to);
         dexRouter_.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             _swapAmountIn,
             _amountOutMin,
@@ -231,16 +218,18 @@ contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
             to,
             deadline
         );
-        boughtAmount = IERC20(tokenB).balanceOf(to) - boughtAmount;
+        boughtAmount =
+            IERC20(path[path.length - 1]).balanceOf(to) -
+            boughtAmount;
 
         require(
-            IERC20(tokenA).transfer(TREASURY, _amountIn - _swapAmountIn),
+            IERC20(path[0]).transfer(TREASURY, _amountIn - _swapAmountIn),
             "Faild Transfer"
         );
 
         emit LogSwapExactTokensForTokens(
-            tokenA,
-            tokenB,
+            path[0],
+            path[path.length - 1],
             _amountIn,
             boughtAmount
         );
