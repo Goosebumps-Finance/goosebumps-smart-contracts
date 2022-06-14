@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@0x/contracts-exchange-libs": "^4.3.37",
     "@openzeppelin/contracts": "^4.6.0",
     "hardhat": "^2.9.3"
   },

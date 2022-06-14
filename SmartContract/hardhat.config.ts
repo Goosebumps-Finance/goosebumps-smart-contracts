@@ -155,13 +155,8 @@ const config: HardhatUserConfig = {
     },
     polygon: {
       url: process.env.POLYGON_URL || "",
-      accounts: {
-        mnemonic: process.env.MNEMONIC,
-        path: "m/44'/60'/0'/0",
-        initialIndex: 0,
-        count: 40,
-        passphrase: "",
-      },
+      accounts:
+        process.env.POLYGON_GOOSEBUMPS_PRIVATE_KEY !== undefined ? [process.env.POLYGON_GOOSEBUMPS_PRIVATE_KEY] : [],
     },
   },
   gasReporter: {
