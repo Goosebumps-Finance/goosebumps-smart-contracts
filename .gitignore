@@ -109,3 +109,7 @@ SmartContract/faltten.sol
 SmartContract/testOnhardhat/
 SmartContract/StakingOnBSCTestnet.txt
 DPEX/
+DPEX_old/
+SmartContract/contracts/Empire/EmpireTest.sol
+SmartContract/scripts/Empire/deployPolygon.ts
+SmartContract/scripts/Empire/deployRopsten.ts
