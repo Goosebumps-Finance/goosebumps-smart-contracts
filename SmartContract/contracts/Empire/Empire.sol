@@ -784,6 +784,7 @@ contract Empire is IERC20, Ownable {
             swapAndDistribute(contractTokenBalance);
         }
 
+        //transfer amount, it will take fee
         _tokenTransfer(from, to, amount);
     }
 
@@ -960,8 +961,11 @@ contract Empire is IERC20, Ownable {
             _takeLiquidity(tLiquidity);
             _takeMarketingAndBurn(tMarketing, tBurn);
             _takeTeam(tTeam);
+            // reflection
             _reflectFee(rFee, tFee);
 
+            // rFee, tFee
+            // `tFee` will miss Transfer event and then with the `tFee`, reflect to all holders.
             emit Transfer(
                 sender,
                 address(this),
