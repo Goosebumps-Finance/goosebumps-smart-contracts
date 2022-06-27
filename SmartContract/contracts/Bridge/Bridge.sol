@@ -21,6 +21,9 @@ interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
 }
 
+/**
+ * @dev The `owner` account will be multi-sig wallet.
+ */
 contract Bridge is Ownable, Pausable, ReentrancyGuard {
     // state variables
 
@@ -76,6 +79,9 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         uint256 fromChainId
     );
 
+    /**
+     * @dev It is not need to do `Zero-address check` of input params because deployer will check this before deploy.
+     */
     constructor(
         address _validator,
         address payable _treasury,
@@ -204,7 +210,10 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         uint256 toChainId,
         address toToken
     ) external onlyOwner {
-        require(bridgeTokenPair[fromToken][toChainId] != toToken, "Already set bridge token pair");
+        require(
+            bridgeTokenPair[fromToken][toChainId] != toToken,
+            "Already set bridge token pair"
+        );
         bridgeTokenPair[fromToken][toChainId] = toToken;
         emit LogUpdateBridgeTokenPairList(fromToken, toChainId, toToken);
     }
@@ -235,31 +244,6 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         require(_fee != fee, "Already set fee");
         fee = _fee;
         emit LogSetFee(fee);
-    }
-
-    // Withdraw functions
-    function withdrawETH(address payable recipient, uint256 amount)
-        external
-        onlyOwner
-    {
-        require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
-        recipient.transfer(amount);
-        
-        emit LogWithdrawalETH(recipient, amount);
-    }
-
-    /**
-     * @notice Should not be withdrawn scam token.
-     */
-    function withdrawERC20(
-        IERC20 token,
-        address recipient,
-        uint256 amount
-    ) external onlyOwner {
-        require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
-        require(token.transfer(recipient, amount), "Transfer Fail");
-
-        emit LogWithdrawalERC20(address(token), recipient, amount);
     }
 
     // Receive and Fallback functions
