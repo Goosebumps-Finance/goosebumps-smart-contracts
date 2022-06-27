@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
@@ -102,6 +102,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
                 amount <= maxAmount * (10**IBridgeToken(token).decimals()),
             "Wrong amount"
         );
+        require(to != address(0), "Zero Address");
         require(msg.value >= fee, "Fee is not fulfilled");
 
         uint256 nonce = currentNonce;
@@ -176,6 +177,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
     // Set functions
 
     function setMinAmount(uint256 _minAmount) external onlyOwner {
+        require(_minAmount != minAmount, "Already set MinAmount");
         require(_minAmount <= maxAmount, "MinAmount <= MaxAmount");
         minAmount = _minAmount;
 
@@ -183,6 +185,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
     }
 
     function setMaxAmount(uint256 _maxAmount) external onlyOwner {
+        require(_maxAmount != maxAmount, "Already set MaxAmount");
         require(_maxAmount >= minAmount, "MaxAmount >= MinAmount");
         maxAmount = _maxAmount;
 
@@ -190,6 +193,8 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
     }
 
     function setPool(address _pool) external onlyOwner {
+        require(_pool != address(0), "Zero address");
+        require(POOL != _pool, "Already set POOL");
         POOL = _pool;
         emit LogSetPool(POOL);
     }
@@ -199,6 +204,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         uint256 toChainId,
         address toToken
     ) external onlyOwner {
+        require(bridgeTokenPair[fromToken][toChainId] != toToken, "Already set bridge token pair");
         bridgeTokenPair[fromToken][toChainId] = toToken;
         emit LogUpdateBridgeTokenPairList(fromToken, toChainId, toToken);
     }
@@ -212,16 +218,21 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
     }
 
     function setValidator(address _validator) external onlyOwner {
+        require(_validator != address(0), "Zero address");
+        require(_validator != validator, "Already set Validator");
         validator = _validator;
         emit LogSetValidator(validator);
     }
 
     function setTreasury(address payable _treasury) external onlyOwner {
+        require(_treasury != address(0), "Zero address");
+        require(_treasury != TREASURY, "Already set Validator");
         TREASURY = _treasury;
         emit LogSetTreasury(TREASURY);
     }
 
     function setFee(uint256 _fee) external onlyOwner {
+        require(_fee != fee, "Already set fee");
         fee = _fee;
         emit LogSetFee(fee);
     }
