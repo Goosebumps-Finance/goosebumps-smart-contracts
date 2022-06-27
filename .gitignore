@@ -116,3 +116,4 @@ SmartContract/scripts/Empire/deployRopsten.ts
 SmartContract/contracts/Empire/EmpireLar-0x0bA7529FD0ea0CA208313f3fB280a91dfAe1B4F3.sol
 SmartContract/contracts/Empire/EmpireOld-0x293c3ee9abacb08bb8ced107987f00efd1539288.sol
 SmartContract/contracts/Bridge/BridgeLar.sol
+SmartContract/contracts/Bridge/BridgeLar-0x62AB5437563fC655226239cA8146F727E1D28BF4.sol
