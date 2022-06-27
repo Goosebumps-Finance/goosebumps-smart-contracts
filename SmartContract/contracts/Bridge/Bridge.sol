@@ -28,7 +28,6 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
     // state variables
 
     address public validator;
-    uint256 public fee = 1 * 10**(18 - 2); // 0.01 Ether
     address payable public TREASURY;
     address public POOL;
 
@@ -37,12 +36,13 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
 
     uint256 private currentNonce = 0;
 
-    mapping(address => mapping(uint256 => address)) public bridgeTokenPair;
+    mapping(address => mapping(uint256 => address)) public bridgeTokenPair; // tokenAddressOfFromChain => (toChainId => tokenAddressOfToChain)
+    mapping(uint256 => uint256) public fees; // Swap fee along `toChainId`
     mapping(bytes32 => bool) public processedRedeem;
 
     // events list
 
-    event LogSetFee(uint256 fee);
+    event LogSetFee(uint256 indexed toChainId, uint256 fee);
     event LogSetValidator(address validator);
     event LogSetTreasury(address indexed treasury);
     event LogSetPool(address indexed pool);
@@ -109,7 +109,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
             "Wrong amount"
         );
         require(to != address(0), "Zero Address");
-        require(msg.value >= fee, "Fee is not fulfilled");
+        require(msg.value >= fees[toChainId], "Fee is not fulfilled");
 
         uint256 nonce = currentNonce;
         currentNonce++;
@@ -240,10 +240,10 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         emit LogSetTreasury(TREASURY);
     }
 
-    function setFee(uint256 _fee) external onlyOwner {
-        require(_fee != fee, "Already set fee");
-        fee = _fee;
-        emit LogSetFee(fee);
+    function setFee(uint256 toChainId, uint256 _fee) external onlyOwner {
+        require(_fee != fees[toChainId], "Already set the same value");
+        fees[toChainId] = _fee;
+        emit LogSetFee(toChainId, _fee);
     }
 
     // Receive and Fallback functions
