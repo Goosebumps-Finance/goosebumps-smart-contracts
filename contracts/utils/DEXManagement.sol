@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./DEX/interfaces/IGooseBumpsSwapRouter02.sol";
-import "./DEX/interfaces/IGooseBumpsSwapFactory.sol";
+import "../DEX/interfaces/IGooseBumpsSwapRouter02.sol";
+import "../DEX/interfaces/IGooseBumpsSwapFactory.sol";
 
 // found issue with transfer fee tokens
 contract DEXManagement is Ownable, Pausable, ReentrancyGuard {
