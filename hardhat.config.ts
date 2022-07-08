@@ -168,14 +168,14 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      ropsten: process.env.ETHERSCAN_API_KEY,
-      rinkeby: process.env.ETHERSCAN_API_KEY,
-      goerli: process.env.ETHERSCAN_API_KEY,
-      kovan: process.env.ETHERSCAN_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+      ropsten: process.env.ETHERSCAN_API_KEY || "",
+      rinkeby: process.env.ETHERSCAN_API_KEY || "",
+      goerli: process.env.ETHERSCAN_API_KEY || "",
+      kovan: process.env.ETHERSCAN_API_KEY || "",
       // binance smart chain
-      bsc: process.env.BSCSCAN_API_KEY,
-      bscTestnet: process.env.BSCSCAN_API_KEY,
+      bsc: process.env.BSCSCAN_API_KEY || "",
+      bscTestnet: process.env.BSCSCAN_API_KEY || "",
       // huobi eco chain
       heco: "YOUR_HECOINFO_API_KEY",
       hecoTestnet: "YOUR_HECOINFO_API_KEY",
@@ -186,8 +186,8 @@ const config: HardhatUserConfig = {
       optimisticEthereum: "YOUR_OPTIMISTIC_ETHERSCAN_API_KEY",
       optimisticKovan: "YOUR_OPTIMISTIC_ETHERSCAN_API_KEY",
       // polygon
-      polygon: process.env.POLYGON_API_KEY,
-      polygonMumbai: process.env.POLYGON_API_KEY,
+      polygon: process.env.POLYGON_API_KEY || "",
+      polygonMumbai: process.env.POLYGON_API_KEY || "",
       // arbitrum
       arbitrumOne: "YOUR_ARBISCAN_API_KEY",
       arbitrumTestnet: "YOUR_ARBISCAN_API_KEY",
