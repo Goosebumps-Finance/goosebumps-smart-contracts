@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../utils/Ownable.sol";
+import "../interfaces/IERC20.sol";
 
 contract ReflectionsDistributor is Ownable {
     /// @notice Info of each user

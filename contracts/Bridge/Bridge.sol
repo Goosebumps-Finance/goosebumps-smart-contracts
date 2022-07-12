@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "../utils/Ownable.sol";
+import "../utils/Pausable.sol";
+import "../utils/ReentrancyGuard.sol";
 
 interface IBridgeToken {
     function transferByBridge(
