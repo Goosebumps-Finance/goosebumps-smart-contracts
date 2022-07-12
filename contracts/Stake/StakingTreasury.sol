@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 
 import "../utils/Ownable.sol";
 import "../interfaces/IERC20.sol";
-import "./interfaces/IReflectionsDistributor.sol";
+import "../interfaces/IReflectionsDistributor.sol";
 
 contract StakingTreasury is Ownable {
     address public stakingVault;

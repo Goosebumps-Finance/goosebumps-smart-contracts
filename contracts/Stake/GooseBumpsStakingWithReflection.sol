@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 import "../interfaces/IERC20.sol";
 import "../utils/Ownable.sol";
 import "../utils/Pausable.sol";
-import "./interfaces/IStakingTreasury.sol";
+import "../interfaces/IStakingTreasury.sol";
 
 contract GooseBumpsStakingWithReflection is Ownable, Pausable {
     struct StakerInfo {
