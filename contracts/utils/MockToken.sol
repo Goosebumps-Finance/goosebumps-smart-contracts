@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Token is ERC20, Ownable {
+contract MockToken is ERC20, Ownable {
     event Mint(address indexed account, uint256 amount);
     event Burn(address indexed account, uint256 amount);
 
