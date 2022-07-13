@@ -26,6 +26,12 @@ contract StakingTreasury is Ownable {
         IERC20 _stakeToken,
         IReflectionsDistributor _reflectionsDistributor
     ) {
+        require(
+            _stakingVault != address(0) && 
+            address(_stakeToken) != address(0) && 
+            address(_reflectionsDistributor) != address(0), 
+            "ZERO_ADDRESS"
+        );
         stakeToken = _stakeToken;
         stakingVault = _stakingVault;
         reflectionsDistributor = _reflectionsDistributor;

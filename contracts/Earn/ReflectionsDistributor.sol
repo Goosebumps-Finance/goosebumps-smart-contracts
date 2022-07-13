@@ -55,6 +55,11 @@ contract ReflectionsDistributor is Ownable {
      * @param _stakeToken The address of the STAKE_TOKEN token
      */
     constructor(IERC20 _stakeToken, address _treasury) {
+        require(
+            address(_stakeToken) != address(0) && 
+            _treasury != address(0), 
+            "ZERO_ADDRESS"
+        );
         stakeToken = _stakeToken;
         treasury = _treasury;
 
