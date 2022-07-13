@@ -18,6 +18,9 @@ import "./Context.sol";
  * the owner.
  */
 abstract contract Ownable is Context {
+    /**
+     * @dev Must be Multi-Signature Wallet.
+     */
     address private _multiSigOwner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
