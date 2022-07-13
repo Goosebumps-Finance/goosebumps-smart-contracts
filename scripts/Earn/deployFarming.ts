@@ -22,12 +22,12 @@ async function main() {
   const _rewardPerBlockTokenN = 100;
   const _rewardPerBlockTokenD = 100;
 
-  const GooseBumpsFarming = await ethers.getContractFactory("GooseBumpsFarming");
-  const gooseBumpsFarming = await GooseBumpsFarming.deploy(_lpToken, _rewardsToken, _treasury, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
+  const GoosebumpsFarming = await ethers.getContractFactory("GoosebumpsFarming");
+  const goosebumpsFarming = await GoosebumpsFarming.deploy(_lpToken, _rewardsToken, _treasury, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
 
-  await gooseBumpsFarming.deployed();
+  await goosebumpsFarming.deployed();
 
-  console.log("GooseBumpsFarming deployed to:", gooseBumpsFarming.address);
+  console.log("GoosebumpsFarming deployed to:", goosebumpsFarming.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -5,7 +5,7 @@ import "../interfaces/IERC20.sol";
 import "../utils/Ownable.sol";
 import "../utils/Pausable.sol";
 
-contract GooseBumpsFarming is Ownable, Pausable {
+contract GoosebumpsFarming is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
         uint256 startBlock;

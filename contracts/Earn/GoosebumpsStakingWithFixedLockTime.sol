@@ -5,7 +5,7 @@ import "../interfaces/IERC20.sol";
 import "../utils/Ownable.sol";
 import "../utils/Pausable.sol";
 
-contract GooseBumpsStakingWithFixedLockTime is Ownable, Pausable {
+contract GoosebumpsStakingWithFixedLockTime is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
         uint256 endTime;

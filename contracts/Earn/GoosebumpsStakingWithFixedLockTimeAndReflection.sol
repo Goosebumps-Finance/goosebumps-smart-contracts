@@ -6,7 +6,7 @@ import "../utils/Ownable.sol";
 import "../utils/Pausable.sol";
 import "../interfaces/IStakingTreasury.sol";
 
-contract GooseBumpsStakingWithFixedLockTimeAndReflection is Ownable, Pausable {
+contract GoosebumpsStakingWithFixedLockTimeAndReflection is Ownable, Pausable {
     struct StakerInfo {
         uint256 amount;
         uint256 endTime;
