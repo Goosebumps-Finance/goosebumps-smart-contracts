@@ -24,7 +24,7 @@ contract ReflectionsDistributor is Ownable {
          */
     }
 
-    IERC20 public immutable stakeToken;
+    IERC20 public stakeToken;
     address public treasury;
     uint256 public minAmountReflection = 1000 * 10**9;
 
@@ -47,6 +47,7 @@ contract ReflectionsDistributor is Ownable {
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
     event ClaimReward(address indexed user, uint256 amount);
+    event LogSetStakeToken(address indexed stakeToken);
     event LogSetTreasury(address treasury);
     event LogSetMinAmountReflection(uint256 minAmountReflection);
 
@@ -169,8 +170,18 @@ contract ReflectionsDistributor is Ownable {
             require(stakeToken.transfer(_to, _amount), "Transfer fail");
         }
     }
+    
+    function setStakeToken(address _stakeToken) external onlyMultiSig {
+        require(_stakeToken != address(0), "ZERO_ADDRESS");
+        require(_stakeToken != address(stakeToken), "SAME_ADDRESS");
+        stakeToken = IERC20(_stakeToken);
+
+        emit LogSetStakeToken(_stakeToken);
+    }
 
     function setTreasury(address _treasury) external onlyMultiSig {
+        require(address(0) != _treasury, "ZERO_ADDRESS");
+        require(treasury != _treasury, "SAME_ADDRESS");
         treasury = _treasury;
         emit LogSetTreasury(treasury);
     }
@@ -179,6 +190,7 @@ contract ReflectionsDistributor is Ownable {
         external
         onlyMultiSig
     {
+        require(minAmountReflection != _minAmountReflection, "SAME_VALUE");
         minAmountReflection = _minAmountReflection;
         emit LogSetMinAmountReflection(minAmountReflection);
     }

@@ -12,11 +12,12 @@ contract StakingTreasury is Ownable {
     uint256 public minAmountReflection = 1000 * 10**9;
 
     IReflectionsDistributor public reflectionsDistributor;
-    IERC20 public immutable stakeToken;
+    IERC20 public stakeToken;
 
     event LogDeposit(address user, uint256 amount);
     event LogWithdrawal(address user, uint256 amount);
     event LogSetStakingVault(address stakingVault);
+    event LogSetStakeToken(address indexed stakeToken);
     event LogSetMinAmountReflection(uint256 minAmountReflection);
     event LogSetReflectionsDistributor(address reflectionsDistributor);
 
@@ -88,14 +89,25 @@ contract StakingTreasury is Ownable {
     }
 
     function setStakingVault(address _stakingVault) external onlyMultiSig {
+        require(_stakingVault != address(0), "ZERO_ADDRESS");
+        require(_stakingVault != address(stakingVault), "SAME_ADDRESS");
         stakingVault = _stakingVault;
         emit LogSetStakingVault(stakingVault);
+    }
+
+    function setStakeToken(address _stakeToken) external onlyMultiSig {
+        require(_stakeToken != address(0), "ZERO_ADDRESS");
+        require(_stakeToken != address(stakeToken), "SAME_ADDRESS");
+        stakeToken = IERC20(_stakeToken);
+
+        emit LogSetStakeToken(_stakeToken);
     }
 
     function setMinAmountReflection(uint256 _minAmountReflection)
         external
         onlyMultiSig
     {
+        require(minAmountReflection != _minAmountReflection, "SAME_VALUE");
         minAmountReflection = _minAmountReflection;
         emit LogSetMinAmountReflection(minAmountReflection);
     }
@@ -103,6 +115,8 @@ contract StakingTreasury is Ownable {
     function setReflectionsDistributor(
         IReflectionsDistributor _reflectionsDistributor
     ) external onlyMultiSig {
+        require(address(_reflectionsDistributor) != address(0), "ZERO_ADDRESS");
+        require(address(_reflectionsDistributor) != address(reflectionsDistributor), "SAME_ADDRESS");
         reflectionsDistributor = _reflectionsDistributor;
         emit LogSetReflectionsDistributor(address(reflectionsDistributor));
     }

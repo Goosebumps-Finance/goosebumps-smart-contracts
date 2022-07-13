@@ -131,10 +131,10 @@ contract GoosebumpsFarming is Ownable, Pausable {
         return newRewards + staker[_staker].stakeRewards;
     }
 
-    function setTreasury(address _tresuary) external onlyMultiSig {
-        require(address(0) != _tresuary, "ZERO_ADDRESS");
-        require(TREASURY != _tresuary, "SAME_ADDRESS");
-        TREASURY = _tresuary;
+    function setTreasury(address _treasury) external onlyMultiSig {
+        require(address(0) != _treasury, "ZERO_ADDRESS");
+        require(TREASURY != _treasury, "SAME_ADDRESS");
+        TREASURY = _treasury;
         emit LogSetTreasury(TREASURY);
     }
 
