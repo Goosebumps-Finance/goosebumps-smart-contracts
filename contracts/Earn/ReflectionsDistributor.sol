@@ -6,24 +6,6 @@ import "../utils/Ownable.sol";
 import "../interfaces/IERC20.sol";
 
 contract ReflectionsDistributor is Ownable {
-    /// @notice Info of each user
-    struct UserInfo {
-        uint256 amount;
-        uint256 rewardDebt;
-        /**
-         * @notice We do some fancy math here. Basically, any point in time, the amount of STAKE_TOKENs
-         * entitled to a user but is pending to be distributed is:
-         *
-         *   pending reward = (user.amount * accRewardPerShare) - user.rewardDebt
-         *
-         * Whenever a user deposits or withdraws STAKE_TOKEN. Here's what happens:
-         *   1. accRewardPerShare (and `lastRewardBalance`) gets updated
-         *   2. User receives the pending reward sent to his/her address
-         *   3. User's `amount` gets updated
-         *   4. User's `rewardDebt` gets updated
-         */
-    }
-
     IERC20 public stakeToken;
     address public treasury;
     uint256 public minAmountReflection = 1000 * 10**9;
@@ -41,8 +23,18 @@ contract ReflectionsDistributor is Ownable {
     /// @notice Accumulated rewards per share, scaled to `ACC_REWARD_PER_SHARE_PRECISION`
     uint256 public accRewardPerShare;
 
-    /// @dev Info of each user that stakes STAKE_TOKEN
-    mapping(address => UserInfo) private userInfo;
+    /**
+     * @notice We do some fancy math here. Basically, any point in time, the amount of STAKE_TOKENs
+     * entitled to a user but is pending to be distributed is:
+     *
+     *   pending reward = (_userAmount * accRewardPerShare) - rewardDebt[_user]
+     *
+     * Whenever a user deposits or withdraws STAKE_TOKEN. Here's what happens:
+     *   1. accRewardPerShare (and `lastRewardBalance`) gets updated
+     *   2. User receives the pending reward sent to his/her address
+     *   3. User's `rewardDebt` gets updated
+     */
+    mapping(address => uint256) public rewardDebt;
 
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
@@ -77,17 +69,15 @@ contract ReflectionsDistributor is Ownable {
     /**
      * @notice Deposit STAKE_TOKEN for reward token allocation
      * @param _amount The amount of STAKE_TOKEN to deposit
+     * @param _userAmount The previous staked amount of STAKE_TOKEN
      */
-    function deposit(address _user, uint256 _amount) external onlyTreasury {
-        UserInfo storage user = userInfo[_user];
-
-        uint256 _previousAmount = user.amount;
-        uint256 _newAmount = user.amount + _amount;
-        user.amount = _newAmount;
+    function deposit(address _user, uint256 _amount, uint256 _userAmount) external onlyTreasury {
+        uint256 _previousAmount = _userAmount;
+        uint256 _newAmount = _userAmount + _amount;
 
         updateReward();
-        uint256 _previousRewardDebt = user.rewardDebt;
-        user.rewardDebt =
+        uint256 _previousRewardDebt = rewardDebt[_user];
+        rewardDebt[_user] =
             (_newAmount * accRewardPerShare) /
             ACC_REWARD_PER_SHARE_PRECISION;
         if (_previousAmount != 0) {
@@ -107,19 +97,17 @@ contract ReflectionsDistributor is Ownable {
     /**
      * @notice Withdraw STAKE_TOKEN and harvest the rewards
      * @param _amount The amount of STAKE_TOKEN to withdraw
+     * @param _userAmount The new staked amount of STAKE_TOKEN
      */
-    function withdraw(address _user, uint256 _amount) external onlyTreasury {
-        UserInfo storage user = userInfo[_user];
-
-        uint256 _previousAmount = user.amount;
-        uint256 _newAmount = user.amount - _amount;
-        user.amount = _newAmount;
+    function withdraw(address _user, uint256 _amount, uint256 _userAmount) external onlyTreasury {
+        uint256 _previousAmount = _userAmount + _amount;
+        uint256 _newAmount = _userAmount;
 
         updateReward();
         uint256 _pending = (_previousAmount * accRewardPerShare) /
             ACC_REWARD_PER_SHARE_PRECISION -
-            user.rewardDebt;
-        user.rewardDebt =
+            rewardDebt[_user];
+        rewardDebt[_user] =
             (_newAmount * accRewardPerShare) /
             ACC_REWARD_PER_SHARE_PRECISION;
         if (_pending > 0) {
@@ -201,27 +189,11 @@ contract ReflectionsDistributor is Ownable {
     }
 
     /**
-     * @notice Get user info
-     * @param _user The address of the user
-     * @return The amount of STAKE_TOKEN user has deposited
-     * @return The reward debt for the chosen token
-     */
-    function getUserInfo(address _user)
-        external
-        view
-        returns (uint256, uint256)
-    {
-        UserInfo storage user = userInfo[_user];
-        return (user.amount, user.rewardDebt);
-    }
-
-    /**
      * @notice View function to see pending reward token on frontend
      * @param _user The address of the user
-     * @return `_user`'s pending reward token
+     * @return uint256 `_user`'s pending reward token
      */
-    function pendingReward(address _user) external view returns (uint256) {
-        UserInfo storage user = userInfo[_user];
+    function pendingReward(address _user, uint256 _userAmount ) external view returns (uint256) {
         uint256 _totalEmpire = internalEmpireBalance;
         uint256 _accRewardTokenPerShare = accRewardPerShare;
 
@@ -239,8 +211,8 @@ contract ReflectionsDistributor is Ownable {
                 _totalEmpire;
         }
         return
-            (user.amount * _accRewardTokenPerShare) /
+            (_userAmount * _accRewardTokenPerShare) /
             ACC_REWARD_PER_SHARE_PRECISION -
-            user.rewardDebt;
+            rewardDebt[_user];
     }
 }

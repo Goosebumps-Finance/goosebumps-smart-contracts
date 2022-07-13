@@ -74,7 +74,7 @@ contract GoosebumpsStakingWithReflection is Ownable, Pausable {
             staker[msg.sender].stakeRewards = getTotalRewards(msg.sender);
         }
 
-        IStakingTreasury(TREASURY).deposit(msg.sender, _amount);
+        IStakingTreasury(TREASURY).deposit(msg.sender, _amount, staker[msg.sender].amount);
         
         staker[msg.sender].amount += _amount;
         staker[msg.sender].startBlock = block.number;
@@ -90,7 +90,7 @@ contract GoosebumpsStakingWithReflection is Ownable, Pausable {
         staker[msg.sender].startBlock = block.number;
         staker[msg.sender].stakeRewards = 0;
 
-        IStakingTreasury(TREASURY).withdraw(msg.sender, _amount);
+        IStakingTreasury(TREASURY).withdraw(msg.sender, _amount, staker[msg.sender].amount);
 
         emit LogUnstake(msg.sender, _amount, amountWithdraw);
     }

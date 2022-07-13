@@ -67,7 +67,7 @@ contract StakingTreasury is Ownable {
         }
     }
 
-    function deposit(address staker, uint256 amount) external onlyStakingVault {
+    function deposit(address staker, uint256 amount, uint256 stakeAmount) external onlyStakingVault {
         transferReflections();
 
         require(
@@ -76,12 +76,12 @@ contract StakingTreasury is Ownable {
         );
         totalStakedBalance += amount;
 
-        reflectionsDistributor.deposit(staker, amount);
+        reflectionsDistributor.deposit(staker, amount, stakeAmount);
 
         emit LogDeposit(staker, amount);
     }
 
-    function withdraw(address staker, uint256 amount)
+    function withdraw(address staker, uint256 amount, uint256 stakeAmount)
         external
         onlyStakingVault
     {
@@ -90,7 +90,7 @@ contract StakingTreasury is Ownable {
         require(stakeToken.transfer(staker, amount), "Transfer fail");
         totalStakedBalance -= amount;
 
-        reflectionsDistributor.withdraw(staker, amount);
+        reflectionsDistributor.withdraw(staker, amount, stakeAmount);
         emit LogWithdrawal(staker, amount);
     }
 
