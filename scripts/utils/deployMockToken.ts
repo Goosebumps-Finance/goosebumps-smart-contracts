@@ -17,7 +17,7 @@ async function main() {
   const name_ = "Roburna Token A"
   const symbol_ = "RT A"
 
-  const Token = await ethers.getContractFactory("Token");
+  const Token = await ethers.getContractFactory("MockToken");
   const token = await Token.deploy(name_, symbol_);
 
   await token.deployed();

@@ -26,7 +26,7 @@ before(async function () {
     let name_ = "Roburna Stake Token"
     let symbol_ = "Stake Token"
 
-    const Token = await ethers.getContractFactory("Token");
+    const Token = await ethers.getContractFactory("MockToken");
     stakeToken = await Token.connect(accountList[0]).deploy(name_, symbol_);
 
     await stakeToken.deployed();
