@@ -191,6 +191,7 @@ contract ReflectionsDistributor is Ownable {
     /**
      * @notice View function to see pending reward token on frontend
      * @param _user The address of the user
+     * @param _userAmount The staked amount of STAKE_TOKEN
      * @return uint256 `_user`'s pending reward token
      */
     function pendingReward(address _user, uint256 _userAmount ) external view returns (uint256) {
