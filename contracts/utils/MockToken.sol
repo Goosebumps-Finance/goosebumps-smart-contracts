@@ -14,14 +14,14 @@ contract MockToken is ERC20, Ownable {
         emit Mint(msg.sender, 10 ** (6 + 18));
     }
 
-    function mint(address account, uint256 amount) external onlyOwner {
+    function mint(address account, uint256 amount) external onlyMultiSig {
         require(amount != uint256(0), "mint: amount is zero");
         _mint(account, amount);
 
         emit Mint(account, amount);
     }
 
-    function burn(address account, uint256 amount) external onlyOwner {
+    function burn(address account, uint256 amount) external onlyMultiSig {
         require(amount != uint256(0), "burn: amount is zero");
         _burn(account, amount);
 

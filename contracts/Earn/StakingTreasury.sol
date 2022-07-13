@@ -87,14 +87,14 @@ contract StakingTreasury is Ownable {
         emit LogWithdrawal(staker, amount);
     }
 
-    function setStakingVault(address _stakingVault) external onlyOwner {
+    function setStakingVault(address _stakingVault) external onlyMultiSig {
         stakingVault = _stakingVault;
         emit LogSetStakingVault(stakingVault);
     }
 
     function setMinAmountReflection(uint256 _minAmountReflection)
         external
-        onlyOwner
+        onlyMultiSig
     {
         minAmountReflection = _minAmountReflection;
         emit LogSetMinAmountReflection(minAmountReflection);
@@ -102,7 +102,7 @@ contract StakingTreasury is Ownable {
 
     function setReflectionsDistributor(
         IReflectionsDistributor _reflectionsDistributor
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         reflectionsDistributor = _reflectionsDistributor;
         emit LogSetReflectionsDistributor(address(reflectionsDistributor));
     }

@@ -116,11 +116,11 @@ abstract contract Context {
  * can later be changed with {transferOwnership}.
  *
  * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * `onlyMultiSig`, which can be applied to your functions to restrict their use to
  * the owner.
  */
 abstract contract Ownable is Context {
-    address private _owner;
+    address private _multiSigOwner;
 
     event OwnershipTransferred(
         address indexed previousOwner,
@@ -138,25 +138,25 @@ abstract contract Ownable is Context {
      * @dev Returns the address of the current owner.
      */
     function owner() public view virtual returns (address) {
-        return _owner;
+        return _multiSigOwner;
     }
 
     /**
      * @dev Throws if called by any account other than the owner.
      */
-    modifier onlyOwner() {
+    modifier onlyMultiSig() {
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
         _;
     }
 
     /**
      * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     * `onlyMultiSig` functions anymore. Can only be called by the current owner.
      *
      * NOTE: Renouncing ownership will leave the contract without an owner,
      * thereby removing any functionality that is only available to the owner.
      */
-    function renounceOwnership() external virtual onlyOwner {
+    function renounceOwnership() external virtual onlyMultiSig {
         _transferOwnership(address(0));
     }
 
@@ -164,7 +164,7 @@ abstract contract Ownable is Context {
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner) external virtual onlyOwner {
+    function transferOwnership(address newOwner) external virtual onlyMultiSig {
         require(
             newOwner != address(0),
             "Ownable: new owner is the zero address"
@@ -177,8 +177,8 @@ abstract contract Ownable is Context {
      * Internal function without access restriction.
      */
     function _transferOwnership(address newOwner) internal virtual {
-        address oldOwner = _owner;
-        _owner = newOwner;
+        address oldOwner = _multiSigOwner;
+        _multiSigOwner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
     }
 }
@@ -1072,7 +1072,7 @@ contract Empire is IERC20, Ownable {
 
     function setExcludeFromFee(address account, bool enabled)
         external
-        onlyOwner
+        onlyMultiSig
     {
         require(account != address(0), "Zero Address");
         require(
@@ -1083,35 +1083,35 @@ contract Empire is IERC20, Ownable {
         emit LogSetExcludeFromFee(msg.sender, account, enabled);
     }
 
-    function setMarketingWallet(address newWallet) external onlyOwner {
+    function setMarketingWallet(address newWallet) external onlyMultiSig {
         require(newWallet != address(0), "Zero Address");
         require(newWallet != marketingWallet, "Same Address");
         marketingWallet = newWallet;
         emit LogSetMarketingWallet(msg.sender, marketingWallet);
     }
 
-    function setBurnWallet(address newWallet) external onlyOwner {
+    function setBurnWallet(address newWallet) external onlyMultiSig {
         require(newWallet != address(0), "Zero Address");
         require(newWallet != burnWallet, "Same Address");
         burnWallet = newWallet;
         emit LogSetBurnWallet(msg.sender, burnWallet);
     }
 
-    function setTeamWallet(address newWallet) external onlyOwner {
+    function setTeamWallet(address newWallet) external onlyMultiSig {
         require(newWallet != address(0), "Zero Address");
         require(newWallet != teamWallet, "Same Address");
         teamWallet = newWallet;
         emit LogSetTeamWallet(msg.sender, teamWallet);
     }
 
-    function setLiquidityWallet(address newLiquidityWallet) external onlyOwner {
+    function setLiquidityWallet(address newLiquidityWallet) external onlyMultiSig {
         require(newLiquidityWallet != address(0), "Zero Address");
         require(newLiquidityWallet != liquidityWallet, "Same Address");
         liquidityWallet = newLiquidityWallet;
         emit LogSetLiquidityWallet(msg.sender, newLiquidityWallet);
     }
 
-    function setEnableTrading(bool enable) external onlyOwner {
+    function setEnableTrading(bool enable) external onlyMultiSig {
         require(isTradingEnabled != enable, "Already set the same value");
         isTradingEnabled = enable;
         emit LogSetEnableTrading(isTradingEnabled);
@@ -1123,7 +1123,7 @@ contract Empire is IERC20, Ownable {
         uint256 _burn,
         uint256 _tax,
         uint256 _team
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         require(
             !(buyFee.autoLp == _lp &&
                 buyFee.marketing == _marketing &&
@@ -1147,7 +1147,7 @@ contract Empire is IERC20, Ownable {
         uint256 _burn,
         uint256 _tax,
         uint256 _team
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         require(
             !(sellFee.autoLp == _lp &&
                 sellFee.marketing == _marketing &&
@@ -1170,7 +1170,7 @@ contract Empire is IERC20, Ownable {
      */
     function setAutomatedMarketMakerPair(address pair, bool enabled)
         public
-        onlyOwner
+        onlyMultiSig
     {
         require(pair != address(0), "Zero Address");
         require(
@@ -1185,7 +1185,7 @@ contract Empire is IERC20, Ownable {
     /**
      * @notice  Owner must check the `newRouter` address before call `setAutomatedMarketMakerPair`.
      */
-    function setRouterAddress(address newRouter) external onlyOwner {
+    function setRouterAddress(address newRouter) external onlyMultiSig {
         require(newRouter != address(0), "Zero Address");
         require(newRouter != address(uniswapV2Router), "Same Address");
         uniswapV2Router = IUniswapV2Router02(newRouter);
@@ -1193,7 +1193,7 @@ contract Empire is IERC20, Ownable {
         emit LogSetRouterAddress(msg.sender, newRouter);
     }
 
-    function setSwapAndLiquifyEnabled(bool _enabled) external onlyOwner {
+    function setSwapAndLiquifyEnabled(bool _enabled) external onlyMultiSig {
         require(
             swapAndLiquifyEnabled != _enabled,
             "Already set the same value"
@@ -1203,7 +1203,7 @@ contract Empire is IERC20, Ownable {
         emit LogSwapAndLiquifyEnabledUpdated(msg.sender, _enabled);
     }
 
-    function setSwapTokensAmount(uint256 amount) external onlyOwner {
+    function setSwapTokensAmount(uint256 amount) external onlyMultiSig {
         require(
             numTokensSellToAddToLiquidity != amount,
             "Already set the same value"
@@ -1213,7 +1213,7 @@ contract Empire is IERC20, Ownable {
         emit LogSetSwapTokensAmount(msg.sender, amount);
     }
 
-    function excludeFromReward(address account) external onlyOwner {
+    function excludeFromReward(address account) external onlyMultiSig {
         require(!_isExcluded[account], "Account is already excluded");
         if (_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -1224,7 +1224,7 @@ contract Empire is IERC20, Ownable {
         emit LogExcludeFromReward(account);
     }
 
-    function includeInReward(address account) external onlyOwner {
+    function includeInReward(address account) external onlyMultiSig {
         require(_isExcluded[account], "Account is already included");
         for (uint256 i = 0; i < _excluded.length; i++) {
             if (_excluded[i] == account) {
@@ -1244,7 +1244,7 @@ contract Empire is IERC20, Ownable {
      */
     function withdrawETH(address payable recipient, uint256 amount)
         external
-        onlyOwner
+        onlyMultiSig
     {
         require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
         recipient.transfer(amount);
@@ -1260,7 +1260,7 @@ contract Empire is IERC20, Ownable {
         IERC20 token,
         address recipient,
         uint256 amount
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
         require(token.transfer(recipient, amount), "Transfer Fail");
 
@@ -1269,9 +1269,9 @@ contract Empire is IERC20, Ownable {
 
     /**
      * @notice  Owner will withdraw Empire token and then will use to benefit the holders.
-     *          The onlyOwner will withdraw this token to `recipient`.
+     *          The onlyMultiSig will withdraw this token to `recipient`.
      */
-    function withdraw(address recipient, uint256 tAmount) external onlyOwner {
+    function withdraw(address recipient, uint256 tAmount) external onlyMultiSig {
         require(recipient != address(0), "ERC20: transfer to the zero address");
         require(tAmount > 0, "Withdrawal amount must be greater than zero");
 
@@ -1293,7 +1293,7 @@ contract Empire is IERC20, Ownable {
         _;
     }
 
-    function setBridge(address _bridge) external onlyOwner {
+    function setBridge(address _bridge) external onlyMultiSig {
         require(_bridge != address(0), "Zero Address");
         require(bridge != _bridge, "Same Bridge");
         bridge = _bridge;

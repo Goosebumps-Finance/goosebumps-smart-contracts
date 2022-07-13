@@ -182,7 +182,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
 
     // Set functions
 
-    function setMinAmount(uint256 _minAmount) external onlyOwner {
+    function setMinAmount(uint256 _minAmount) external onlyMultiSig {
         require(_minAmount != minAmount, "Already set MinAmount");
         require(_minAmount <= maxAmount, "MinAmount <= MaxAmount");
         minAmount = _minAmount;
@@ -190,7 +190,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         emit LogSetMinAmount(minAmount);
     }
 
-    function setMaxAmount(uint256 _maxAmount) external onlyOwner {
+    function setMaxAmount(uint256 _maxAmount) external onlyMultiSig {
         require(_maxAmount != maxAmount, "Already set MaxAmount");
         require(_maxAmount >= minAmount, "MaxAmount >= MinAmount");
         maxAmount = _maxAmount;
@@ -198,7 +198,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         emit LogSetMaxAmount(maxAmount);
     }
 
-    function setPool(address _pool) external onlyOwner {
+    function setPool(address _pool) external onlyMultiSig {
         require(_pool != address(0), "Zero address");
         require(POOL != _pool, "Already set POOL");
         POOL = _pool;
@@ -209,7 +209,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         address fromToken,
         uint256 toChainId,
         address toToken
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         require(
             bridgeTokenPair[fromToken][toChainId] != toToken,
             "Already set bridge token pair"
@@ -218,29 +218,29 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         emit LogUpdateBridgeTokenPairList(fromToken, toChainId, toToken);
     }
 
-    function setPause() external onlyOwner {
+    function setPause() external onlyMultiSig {
         _pause();
     }
 
-    function setUnpause() external onlyOwner {
+    function setUnpause() external onlyMultiSig {
         _unpause();
     }
 
-    function setValidator(address _validator) external onlyOwner {
+    function setValidator(address _validator) external onlyMultiSig {
         require(_validator != address(0), "Zero address");
         require(_validator != validator, "Already set Validator");
         validator = _validator;
         emit LogSetValidator(validator);
     }
 
-    function setTreasury(address payable _treasury) external onlyOwner {
+    function setTreasury(address payable _treasury) external onlyMultiSig {
         require(_treasury != address(0), "Zero address");
         require(_treasury != TREASURY, "Already set Validator");
         TREASURY = _treasury;
         emit LogSetTreasury(TREASURY);
     }
 
-    function setFee(uint256 toChainId, uint256 _fee) external onlyOwner {
+    function setFee(uint256 toChainId, uint256 _fee) external onlyMultiSig {
         require(_fee != fees[toChainId], "Already set the same value");
         fees[toChainId] = _fee;
         emit LogSetFee(toChainId, _fee);

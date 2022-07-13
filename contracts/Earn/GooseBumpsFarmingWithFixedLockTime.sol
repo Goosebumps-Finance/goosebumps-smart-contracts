@@ -129,26 +129,26 @@ contract GooseBumpsFarmingWithFixedLockTime is Ownable, Pausable {
         return newRewards + staker[_staker].stakeRewards;
     }
 
-    function setTreasury(address _tresuary) external onlyOwner {
+    function setTreasury(address _tresuary) external onlyMultiSig {
         TREASURY = _tresuary;
         emit LogSetTreasury(TREASURY);
     }
 
-    function setRewardWallet(address _rewardWallet) external onlyOwner {
+    function setRewardWallet(address _rewardWallet) external onlyMultiSig {
         REWARD_WALLET = _rewardWallet;
         emit LogSetRewardWallet(REWARD_WALLET);
     }
 
-    function setLockTime(uint256 _lockTime) external onlyOwner {
+    function setLockTime(uint256 _lockTime) external onlyMultiSig {
         lockTime = _lockTime;
         emit LogSetLockTime(lockTime);
     }
 
-    function setPause() external onlyOwner {
+    function setPause() external onlyMultiSig {
         _pause();
     }
 
-    function setUnpause() external onlyOwner {
+    function setUnpause() external onlyMultiSig {
         _unpause();
     }
 }

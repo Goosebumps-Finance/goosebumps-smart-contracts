@@ -450,22 +450,22 @@ contract MiniRouter is Ownable, Pausable, ReentrancyGuard {
         emit LogFallback(msg.sender, msg.value);
     }
 
-    function setPause() external onlyOwner {
+    function setPause() external onlyMultiSig {
         _pause();
     }
 
-    function setUnpause() external onlyOwner {
+    function setUnpause() external onlyMultiSig {
         _unpause();
     }
 
-    function setEmpire(address empire_) public onlyOwner {
+    function setEmpire(address empire_) public onlyMultiSig {
         empire = empire_;
         emit LogSetEmpire(empire_);
     }
 
     function updateSupportedRouters(address router, bool enabled)
         public
-        onlyOwner
+        onlyMultiSig
     {
         supportedRouters[router] = enabled;
 
@@ -474,7 +474,7 @@ contract MiniRouter is Ownable, Pausable, ReentrancyGuard {
 
     function updateSupportedTokens(address token, bool enabled)
         public
-        onlyOwner
+        onlyMultiSig
     {
         supportedTokens[token] = enabled;
 
@@ -483,7 +483,7 @@ contract MiniRouter is Ownable, Pausable, ReentrancyGuard {
 
     function withdrawETH(address payable recipient, uint256 amount)
         external
-        onlyOwner
+        onlyMultiSig
     {
         require(amount <= (address(this)).balance, "INSUFFICIENT_FUNDS");
         recipient.transfer(amount);
@@ -497,7 +497,7 @@ contract MiniRouter is Ownable, Pausable, ReentrancyGuard {
         IERC20 token,
         address recipient,
         uint256 amount
-    ) external onlyOwner {
+    ) external onlyMultiSig {
         require(amount <= token.balanceOf(address(this)), "INSUFFICIENT_FUNDS");
         require(token.transfer(recipient, amount), "Transfer Fail");
 

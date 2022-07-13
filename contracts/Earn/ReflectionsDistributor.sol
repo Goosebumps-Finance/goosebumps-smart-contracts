@@ -170,14 +170,14 @@ contract ReflectionsDistributor is Ownable {
         }
     }
 
-    function setTreasury(address _treasury) external onlyOwner {
+    function setTreasury(address _treasury) external onlyMultiSig {
         treasury = _treasury;
         emit LogSetTreasury(treasury);
     }
 
     function setMinAmountReflection(uint256 _minAmountReflection)
         external
-        onlyOwner
+        onlyMultiSig
     {
         minAmountReflection = _minAmountReflection;
         emit LogSetMinAmountReflection(minAmountReflection);
