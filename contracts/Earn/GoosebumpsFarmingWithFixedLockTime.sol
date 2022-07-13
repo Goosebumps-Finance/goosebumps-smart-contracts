@@ -16,11 +16,11 @@ contract GoosebumpsFarmingWithFixedLockTime is Ownable, Pausable {
     // Staker Info
     mapping(address => StakerInfo) public staker;
 
-    uint256 public immutable rewardPerBlockTokenN;
-    uint256 public immutable rewardPerBlockTokenD; // Must be greater than zero
+    uint256 public rewardPerBlockTokenN;
+    uint256 public rewardPerBlockTokenD; // Must be greater than zero
 
-    IERC20 public immutable lpToken;
-    IERC20 public immutable rewardsToken;
+    IERC20 public lpToken;
+    IERC20 public rewardsToken;
 
     uint256 public lockTime = 30 days;
 
@@ -37,6 +37,9 @@ contract GoosebumpsFarmingWithFixedLockTime is Ownable, Pausable {
     event LogSetTreasury(address indexed newTreasury);
     event LogSetRewardWallet(address indexed newRewardWallet);
     event LogSetLockTime(uint256 lockTime);
+    event LogSetRewardsToken(address indexed rewardsToken);
+    event LogSetLpToken(address indexed lpToken);
+    event LogSetRewardPerBlockToken(uint256 rewardPerBlockTokenN, uint256 rewardPerBlockTokenD);
 
     constructor(
         IERC20 _lpToken,
@@ -46,6 +49,14 @@ contract GoosebumpsFarmingWithFixedLockTime is Ownable, Pausable {
         uint256 _rewardPerBlockTokenN,
         uint256 _rewardPerBlockTokenD
     ) {
+        require(
+            address(_lpToken) != address(0) && 
+            address(_rewardsToken) != address(0) && 
+            _treasury != address(0) && 
+            _rewardWallet != address(0), 
+            "ZERO_ADDRESS"
+        );
+        require(_rewardPerBlockTokenD != 0, "ZERO_VALUE");
         lpToken = _lpToken;
         rewardsToken = _rewardsToken;
         TREASURY = _treasury;
@@ -130,18 +141,48 @@ contract GoosebumpsFarmingWithFixedLockTime is Ownable, Pausable {
     }
 
     function setTreasury(address _tresuary) external onlyMultiSig {
+        require(address(0) != _tresuary, "ZERO_ADDRESS");
+        require(TREASURY != _tresuary, "SAME_ADDRESS");
         TREASURY = _tresuary;
         emit LogSetTreasury(TREASURY);
     }
 
     function setRewardWallet(address _rewardWallet) external onlyMultiSig {
+        require(address(0) != _rewardWallet, "ZERO_ADDRESS");
+        require(REWARD_WALLET != _rewardWallet, "SAME_ADDRESS");
         REWARD_WALLET = _rewardWallet;
         emit LogSetRewardWallet(REWARD_WALLET);
     }
 
     function setLockTime(uint256 _lockTime) external onlyMultiSig {
+        require(lockTime != _lockTime, "SAME_VALUE");
         lockTime = _lockTime;
         emit LogSetLockTime(lockTime);
+    }
+
+    function setRewardPerBlockToken(uint256 _rewardPerBlockTokenN, uint256 _rewardPerBlockTokenD) external onlyMultiSig {
+        require(_rewardPerBlockTokenD != 0, "ZERO_VALUE");
+        require(!(rewardPerBlockTokenN == _rewardPerBlockTokenN && rewardPerBlockTokenD == _rewardPerBlockTokenD), "SAME_VALUE");
+        rewardPerBlockTokenN = _rewardPerBlockTokenN;
+        rewardPerBlockTokenD = _rewardPerBlockTokenD;
+
+        emit LogSetRewardPerBlockToken(rewardPerBlockTokenN, rewardPerBlockTokenD);
+    }
+
+    function setLpToken(address _lpToken) external onlyMultiSig {
+        require(_lpToken != address(0), "ZERO_ADDRESS");
+        require(_lpToken != address(lpToken), "SAME_ADDRESS");
+        lpToken = IERC20(_lpToken);
+
+        emit LogSetLpToken(_lpToken);
+    }
+
+    function setRewardsToken(address _rewardsToken) external onlyMultiSig {
+        require(_rewardsToken != address(0), "ZERO_ADDRESS");
+        require(_rewardsToken != address(rewardsToken), "SAME_ADDRESS");
+        rewardsToken = IERC20(_rewardsToken);
+        
+        emit LogSetRewardsToken(_rewardsToken);
     }
 
     function setPause() external onlyMultiSig {
