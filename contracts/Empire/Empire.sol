@@ -120,6 +120,9 @@ abstract contract Context {
  * the owner.
  */
 abstract contract Ownable is Context {
+    /**
+     * @dev Must be Multi-Signature Wallet.
+     */
     address private _multiSigOwner;
 
     event OwnershipTransferred(
@@ -135,6 +138,14 @@ abstract contract Ownable is Context {
     }
 
     /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyMultiSig() {
+        _checkOwner();
+        _;
+    }
+
+    /**
      * @dev Returns the address of the current owner.
      */
     function owner() public view virtual returns (address) {
@@ -142,11 +153,10 @@ abstract contract Ownable is Context {
     }
 
     /**
-     * @dev Throws if called by any account other than the owner.
+     * @dev Throws if the sender is not the owner.
      */
-    modifier onlyMultiSig() {
+    function _checkOwner() internal view virtual {
         require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
     }
 
     /**
@@ -1104,7 +1114,10 @@ contract Empire is IERC20, Ownable {
         emit LogSetTeamWallet(msg.sender, teamWallet);
     }
 
-    function setLiquidityWallet(address newLiquidityWallet) external onlyMultiSig {
+    function setLiquidityWallet(address newLiquidityWallet)
+        external
+        onlyMultiSig
+    {
         require(newLiquidityWallet != address(0), "Zero Address");
         require(newLiquidityWallet != liquidityWallet, "Same Address");
         liquidityWallet = newLiquidityWallet;
@@ -1271,7 +1284,10 @@ contract Empire is IERC20, Ownable {
      * @notice  Owner will withdraw Empire token and then will use to benefit the holders.
      *          The onlyMultiSig will withdraw this token to `recipient`.
      */
-    function withdraw(address recipient, uint256 tAmount) external onlyMultiSig {
+    function withdraw(address recipient, uint256 tAmount)
+        external
+        onlyMultiSig
+    {
         require(recipient != address(0), "ERC20: transfer to the zero address");
         require(tAmount > 0, "Withdrawal amount must be greater than zero");
 
