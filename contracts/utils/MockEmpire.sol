@@ -218,6 +218,8 @@ contract MockEmpire is IERC20, Ownable {
         sellFee.tax = 2;
         sellFee.team = 1;
 
+        isTradingEnabled = true;
+
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 

@@ -39,6 +39,8 @@ async function main() {
     const empire = await Empire.deploy(_router, _marketingWallet, _teamWallet, _liquidityWallet, sTokenName_, sTokenSymbol_);
     await empire.deployed();
     console.log("MockEmpire deployed to:", empire.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Approve MockEmpire to router
@@ -46,6 +48,8 @@ async function main() {
     const txApprove = await empire.approve(_router, ethers.utils.parseUnits("100000000", 9));
     const retTxApprove = await txApprove.wait();
     console.log("MockEmpire Approve txHash: ", retTxApprove.transactionHash);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Mock BUSD token
@@ -58,6 +62,8 @@ async function main() {
     const busdToken = await MockToken.deploy(BusdName_, BusdSymbol_);
     await busdToken.deployed();
     console.log("busdToken deployed to:", busdToken.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Appove MockBUSD to router
@@ -65,6 +71,8 @@ async function main() {
     const txMockBUSDApprove = await busdToken.approve(_router, ethers.utils.parseUnits("100000000", 9));
     const retTxMockBUSDApprove = await txMockBUSDApprove.wait();
     console.log("MockBUSD Approve txHash: ", retTxMockBUSDApprove.transactionHash);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // AddLiquidityETH (MockEmpire/BNB)
@@ -193,7 +201,8 @@ async function main() {
 
     const router = new ethers.Contract(_router, _routerABI, deployer);
 
-    const timeStamp = (await ethers.getDefaultProvider().getBlock("pending")).timestamp
+    const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-2-s3.binance.org:8545/")
+    const timeStamp = (await provider.getBlock("pending")).timestamp
     console.log("timeStamp: ", timeStamp)
     const txAddLiquidityETH = await router.addLiquidityETH(
         empire.address,
@@ -204,6 +213,8 @@ async function main() {
     );
     const retTxAddLiquidityETH = await txAddLiquidityETH.wait();
     console.log("AddLiquidityETH txHash: ", retTxAddLiquidityETH.transactionHash)
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // AddLiquidity (MockEmpire/MockBUSD)
@@ -218,6 +229,8 @@ async function main() {
     );
     const retTxAddLiquidity = await txAddLiquidity.wait();
     console.log("AddLiquidity txHash: ", retTxAddLiquidity.transactionHash)
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Staking Reward token
@@ -229,6 +242,8 @@ async function main() {
     const sRewardToken = await MockToken.deploy(sRewardName_, sRewardSymbol_);
     await sRewardToken.deployed();
     console.log("sRewardToken deployed to:", sRewardToken.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Farming Reward token
@@ -240,6 +255,8 @@ async function main() {
     const fReward = await MockToken.deploy(fRewardName_, fRewardSymbol_);
     await fReward.deployed();
     console.log("fReward deployed to:", fReward.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Staking
@@ -260,6 +277,8 @@ async function main() {
     const goosebumpsStaking = await GoosebumpsStaking.deploy(_stakeToken, _rewardsToken, _treasury, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
     await goosebumpsStaking.deployed();
     console.log("GoosebumpsStaking deployed to:", goosebumpsStaking.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // StakingWithFixedLockTime
@@ -275,6 +294,8 @@ async function main() {
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN);
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD);
     console.log("GoosebumpsStakingWithFixedLockTime deployed to:", goosebumpsStakingWithFixedLockTime.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // StakingWithReflection
@@ -318,6 +339,8 @@ async function main() {
     const txSetStakingVault = await stakingTreasuryWithReflections.setStakingVault(goosebumpsStakingWithReflection.address)
     const retTxSetStakingVault = await txSetStakingVault.wait()
     console.log("setStakingVault txHash: ", retTxSetStakingVault.transactionHash)
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // StakingWithLockTimeAndReflection
@@ -357,6 +380,8 @@ async function main() {
     const txSetStakingVaultWithLock = await stakingTreasuryWithReflectionsAndLock.setStakingVault(goosebumpsStakingWithReflectionAndLock.address)
     const retTxSetStakingVaultWithLock = await txSetStakingVaultWithLock.wait()
     console.log("setStakingVault txHash: ", retTxSetStakingVaultWithLock.transactionHash)
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Farming
@@ -406,6 +431,8 @@ async function main() {
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
     console.log("goosebumpsFarming deployed to:", goosebumpsFarming.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // Farming(Empire/BUSD)
@@ -420,6 +447,8 @@ async function main() {
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
     console.log("goosebumpsFarmingBUSD deployed to:", goosebumpsFarmingBUSD.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // FarmingWithFixedLockTime
@@ -434,6 +463,8 @@ async function main() {
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
     console.log("goosebumpsFarmingWithFixedLockTime deployed to:", goosebumpsFarmingWithFixedLockTime.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
 
     // FarmingWithFixedLockTime(Empire/BUSD)
@@ -447,7 +478,13 @@ async function main() {
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
     console.log("goosebumpsFarmingWithFixedLockTimeBUSD deployed to:", goosebumpsFarmingWithFixedLockTimeBUSD.address);
+    console.log("delay...")
+    sleep(1000)
     console.log("==========================================")
+}
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
