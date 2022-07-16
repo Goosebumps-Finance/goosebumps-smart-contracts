@@ -9,9 +9,9 @@ contract MockToken is ERC20, Ownable {
     event Burn(address indexed account, uint256 amount);
 
     constructor(string memory name_, string memory symbol_) ERC20 (name_, symbol_) {
-        _mint(msg.sender, 10 ** (6 + 18)); // supply 1 million
+        _mint(msg.sender, 10 ** (10 + 18)); // supply 1 million
 
-        emit Mint(msg.sender, 10 ** (6 + 18));
+        emit Mint(msg.sender, 10 ** (10 + 18));
     }
 
     function mint(address account, uint256 amount) external onlyMultiSig {
