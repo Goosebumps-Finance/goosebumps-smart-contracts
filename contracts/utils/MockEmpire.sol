@@ -48,7 +48,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
  *
  * The `owner` account of Empire token contract will be multi-sig wallet.
  */
-contract Empire is IERC20, Ownable {
+contract MockEmpire is IERC20, Ownable {
     mapping(address => uint256) private _rOwned;
     mapping(address => uint256) private _tOwned;
     mapping(address => mapping(address => uint256)) private _allowances;
