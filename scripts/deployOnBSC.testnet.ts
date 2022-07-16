@@ -68,7 +68,7 @@ async function main() {
 
     // Appove MockBUSD to router
     console.log("=====================Mock BUSD Appove=====================")
-    const txMockBUSDApprove = await busdToken.approve(_router, ethers.utils.parseUnits("100000000", 9));
+    const txMockBUSDApprove = await busdToken.approve(_router, ethers.utils.parseUnits("100000000", 18));
     const retTxMockBUSDApprove = await txMockBUSDApprove.wait();
     console.log("MockBUSD Approve txHash: ", retTxMockBUSDApprove.transactionHash);
     console.log("delay...")
