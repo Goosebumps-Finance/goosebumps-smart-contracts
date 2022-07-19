@@ -367,7 +367,8 @@ async function main() {
     console.log("_rewardWallet: ", _rewardWallet)
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
-    const goosebumpsStakingWithReflectionAndLock = await GoosebumpsStakingWithReflection.deploy(
+    const GoosebumpsStakingWithReflectionAndLock = await ethers.getContractFactory("GoosebumpsStakingWithReflectionAndLock");
+    const goosebumpsStakingWithReflectionAndLock = await GoosebumpsStakingWithReflectionAndLock.deploy(
         _stakeToken, _rewardsToken, stakingTreasuryWithReflectionsAndLock.address, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
     await goosebumpsStakingWithReflectionAndLock.deployed();
     console.log("goosebumpsStakingWithReflectionAndLock deployed to:", goosebumpsStakingWithReflectionAndLock.address);
