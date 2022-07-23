@@ -346,39 +346,39 @@ async function main() {
     // StakingWithLockTimeAndReflection
     console.log("=====================StakingWithLockTimeAndReflection=====================")
     // ReflectionsDistributor for StakingWithLockTimeAndReflection
-    const reflectionsDistributorWithReflectionsAndLock = await ReflectionsDistributor.deploy(_stakeToken, _treasury);
-    await reflectionsDistributorWithReflectionsAndLock.deployed();
+    const reflectionsDistributorWithLockTimeAndReflection = await ReflectionsDistributor.deploy(_stakeToken, _treasury);
+    await reflectionsDistributorWithLockTimeAndReflection.deployed();
     console.log("_stakeToken: ", _stakeToken)
     console.log("_treasury: ", _treasury)
-    console.log("reflectionsDistributorWithReflectionsAndLock deployed to:", reflectionsDistributorWithReflectionsAndLock.address);
+    console.log("reflectionsDistributorWithLockTimeAndReflection deployed to:", reflectionsDistributorWithLockTimeAndReflection.address);
 
     // StakingTreasury for StakingWithLockTimeAndReflection
-    const stakingTreasuryWithReflectionsAndLock = await StakingTreasury.deploy(_stakingVault, _stakeToken, reflectionsDistributorWithReflectionsAndLock.address);
-    await stakingTreasuryWithReflectionsAndLock.deployed();
+    const stakingTreasuryWithLockTimeAndReflection = await StakingTreasury.deploy(_stakingVault, _stakeToken, reflectionsDistributorWithLockTimeAndReflection.address);
+    await stakingTreasuryWithLockTimeAndReflection.deployed();
     console.log("_stakingVault: ", _stakingVault)
     console.log("_stakeToken: ", _stakeToken)
-    console.log("_reflectionsDistributor: ", reflectionsDistributorWithReflectionsAndLock.address)
-    console.log("stakingTreasuryWithReflectionsAndLock deployed to:", stakingTreasuryWithReflectionsAndLock.address);
+    console.log("_reflectionsDistributor: ", reflectionsDistributorWithLockTimeAndReflection.address)
+    console.log("stakingTreasuryWithLockTimeAndReflection deployed to:", stakingTreasuryWithLockTimeAndReflection.address);
 
     // StakingWithLockTimeAndReflection
     console.log("_stakeToken: ", _stakeToken)
     console.log("_rewardsToken: ", _rewardsToken)
-    console.log("_treasury: ", stakingTreasuryWithReflectionsAndLock.address)
+    console.log("_treasury: ", stakingTreasuryWithLockTimeAndReflection.address)
     console.log("_rewardWallet: ", _rewardWallet)
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
-    const GoosebumpsStakingWithReflectionAndLock = await ethers.getContractFactory("GoosebumpsStakingWithReflectionAndLock");
-    const goosebumpsStakingWithReflectionAndLock = await GoosebumpsStakingWithReflectionAndLock.deploy(
-        _stakeToken, _rewardsToken, stakingTreasuryWithReflectionsAndLock.address, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
-    await goosebumpsStakingWithReflectionAndLock.deployed();
-    console.log("goosebumpsStakingWithReflectionAndLock deployed to:", goosebumpsStakingWithReflectionAndLock.address);
+    const GoosebumpsStakingWithLockTimeAndReflection = await ethers.getContractFactory("GoosebumpsStakingWithLockTimeAndReflection");
+    const goosebumpsStakingWithLockTimeAndReflection = await GoosebumpsStakingWithLockTimeAndReflection.deploy(
+        _stakeToken, _rewardsToken, stakingTreasuryWithLockTimeAndReflection.address, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
+    await goosebumpsStakingWithLockTimeAndReflection.deployed();
+    console.log("goosebumpsStakingWithLockTimeAndReflection deployed to:", goosebumpsStakingWithLockTimeAndReflection.address);
 
     // Set params
-    const txSetTreasuryWithLock = await reflectionsDistributorWithReflectionsAndLock.setTreasury(stakingTreasuryWithReflectionsAndLock.address)
+    const txSetTreasuryWithLock = await reflectionsDistributorWithLockTimeAndReflection.setTreasury(stakingTreasuryWithLockTimeAndReflection.address)
     const retTxSetTreasuryWithLock = await txSetTreasuryWithLock.wait()
     console.log("setTreasury txHash: ", retTxSetTreasuryWithLock.transactionHash)
 
-    const txSetStakingVaultWithLock = await stakingTreasuryWithReflectionsAndLock.setStakingVault(goosebumpsStakingWithReflectionAndLock.address)
+    const txSetStakingVaultWithLock = await stakingTreasuryWithLockTimeAndReflection.setStakingVault(goosebumpsStakingWithLockTimeAndReflection.address)
     const retTxSetStakingVaultWithLock = await txSetStakingVaultWithLock.wait()
     console.log("setStakingVault txHash: ", retTxSetStakingVaultWithLock.transactionHash)
     console.log("delay...")
