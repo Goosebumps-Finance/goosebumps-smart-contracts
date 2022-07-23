@@ -209,7 +209,7 @@ async function main() {
         ethers.utils.parseUnits("1000000", 9), 0, 0,
         deployer.address,
         timeStamp + 1000,
-        { value: ethers.utils.parseEther("5") }
+        { value: ethers.utils.parseEther("0.05") }
     );
     const retTxAddLiquidityETH = await txAddLiquidityETH.wait();
     console.log("AddLiquidityETH txHash: ", retTxAddLiquidityETH.transactionHash)
