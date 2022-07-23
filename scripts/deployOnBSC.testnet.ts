@@ -343,42 +343,42 @@ async function main() {
     sleep(1000)
     console.log("==========================================")
 
-    // StakingWithLockTimeAndReflection
-    console.log("=====================StakingWithLockTimeAndReflection=====================")
-    // ReflectionsDistributor for StakingWithLockTimeAndReflection
-    const reflectionsDistributorWithLockTimeAndReflection = await ReflectionsDistributor.deploy(_stakeToken, _treasury);
-    await reflectionsDistributorWithLockTimeAndReflection.deployed();
+    // StakingWithFixedLockTimeAndReflection
+    console.log("=====================StakingWithFixedLockTimeAndReflection=====================")
+    // ReflectionsDistributor for StakingWithFixedLockTimeAndReflection
+    const reflectionsDistributorWithFixedLockTimeAndReflection = await ReflectionsDistributor.deploy(_stakeToken, _treasury);
+    await reflectionsDistributorWithFixedLockTimeAndReflection.deployed();
     console.log("_stakeToken: ", _stakeToken)
     console.log("_treasury: ", _treasury)
-    console.log("reflectionsDistributorWithLockTimeAndReflection deployed to:", reflectionsDistributorWithLockTimeAndReflection.address);
+    console.log("reflectionsDistributorWithFixedLockTimeAndReflection deployed to:", reflectionsDistributorWithFixedLockTimeAndReflection.address);
 
-    // StakingTreasury for StakingWithLockTimeAndReflection
-    const stakingTreasuryWithLockTimeAndReflection = await StakingTreasury.deploy(_stakingVault, _stakeToken, reflectionsDistributorWithLockTimeAndReflection.address);
-    await stakingTreasuryWithLockTimeAndReflection.deployed();
+    // StakingTreasury for StakingWithFixedLockTimeAndReflection
+    const stakingTreasuryWithFixedLockTimeAndReflection = await StakingTreasury.deploy(_stakingVault, _stakeToken, reflectionsDistributorWithFixedLockTimeAndReflection.address);
+    await stakingTreasuryWithFixedLockTimeAndReflection.deployed();
     console.log("_stakingVault: ", _stakingVault)
     console.log("_stakeToken: ", _stakeToken)
-    console.log("_reflectionsDistributor: ", reflectionsDistributorWithLockTimeAndReflection.address)
-    console.log("stakingTreasuryWithLockTimeAndReflection deployed to:", stakingTreasuryWithLockTimeAndReflection.address);
+    console.log("_reflectionsDistributor: ", reflectionsDistributorWithFixedLockTimeAndReflection.address)
+    console.log("stakingTreasuryWithFixedLockTimeAndReflection deployed to:", stakingTreasuryWithFixedLockTimeAndReflection.address);
 
-    // StakingWithLockTimeAndReflection
+    // StakingWithFixedLockTimeAndReflection
     console.log("_stakeToken: ", _stakeToken)
     console.log("_rewardsToken: ", _rewardsToken)
-    console.log("_treasury: ", stakingTreasuryWithLockTimeAndReflection.address)
+    console.log("_treasury: ", stakingTreasuryWithFixedLockTimeAndReflection.address)
     console.log("_rewardWallet: ", _rewardWallet)
     console.log("_rewardPerBlockTokenN: ", _rewardPerBlockTokenN)
     console.log("_rewardPerBlockTokenD: ", _rewardPerBlockTokenD)
-    const GoosebumpsStakingWithLockTimeAndReflection = await ethers.getContractFactory("GoosebumpsStakingWithLockTimeAndReflection");
-    const goosebumpsStakingWithLockTimeAndReflection = await GoosebumpsStakingWithLockTimeAndReflection.deploy(
-        _stakeToken, _rewardsToken, stakingTreasuryWithLockTimeAndReflection.address, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
-    await goosebumpsStakingWithLockTimeAndReflection.deployed();
-    console.log("goosebumpsStakingWithLockTimeAndReflection deployed to:", goosebumpsStakingWithLockTimeAndReflection.address);
+    const GoosebumpsStakingWithFixedLockTimeAndReflection = await ethers.getContractFactory("GoosebumpsStakingWithFixedLockTimeAndReflection");
+    const goosebumpsStakingWithFixedLockTimeAndReflection = await GoosebumpsStakingWithFixedLockTimeAndReflection.deploy(
+        _stakeToken, _rewardsToken, stakingTreasuryWithFixedLockTimeAndReflection.address, _rewardWallet, _rewardPerBlockTokenN, _rewardPerBlockTokenD);
+    await goosebumpsStakingWithFixedLockTimeAndReflection.deployed();
+    console.log("goosebumpsStakingWithFixedLockTimeAndReflection deployed to:", goosebumpsStakingWithFixedLockTimeAndReflection.address);
 
     // Set params
-    const txSetTreasuryWithLock = await reflectionsDistributorWithLockTimeAndReflection.setTreasury(stakingTreasuryWithLockTimeAndReflection.address)
+    const txSetTreasuryWithLock = await reflectionsDistributorWithFixedLockTimeAndReflection.setTreasury(stakingTreasuryWithFixedLockTimeAndReflection.address)
     const retTxSetTreasuryWithLock = await txSetTreasuryWithLock.wait()
     console.log("setTreasury txHash: ", retTxSetTreasuryWithLock.transactionHash)
 
-    const txSetStakingVaultWithLock = await stakingTreasuryWithLockTimeAndReflection.setStakingVault(goosebumpsStakingWithLockTimeAndReflection.address)
+    const txSetStakingVaultWithLock = await stakingTreasuryWithFixedLockTimeAndReflection.setStakingVault(goosebumpsStakingWithFixedLockTimeAndReflection.address)
     const retTxSetStakingVaultWithLock = await txSetStakingVaultWithLock.wait()
     console.log("setStakingVault txHash: ", retTxSetStakingVaultWithLock.transactionHash)
     console.log("delay...")
