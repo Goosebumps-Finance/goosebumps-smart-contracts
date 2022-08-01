@@ -237,6 +237,9 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
  * The `owner` account of Empire token contract will be multi-sig wallet.
  */
 contract Empire is IERC20, Ownable {
+    uint256 public constant MAX_BUY_FEE = 50;
+    uint256 public constant MAX_SELL_FEE = 50;
+
     mapping(address => uint256) private _rOwned;
     mapping(address => uint256) private _tOwned;
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -1145,6 +1148,7 @@ contract Empire is IERC20, Ownable {
                 buyFee.team == _team),
             "Nothing is changed"
         );
+        require((_lp + _marketing + _burn + _tax + _team) < MAX_BUY_FEE, "Overflow MAX_BUY_FEE");
         buyFee.autoLp = _lp;
         buyFee.marketing = _marketing;
         buyFee.burn = _burn;
@@ -1169,6 +1173,7 @@ contract Empire is IERC20, Ownable {
                 sellFee.team == _team),
             "Nothing is changed"
         );
+        require((_lp + _marketing + _burn + _tax + _team) < MAX_SELL_FEE, "Overflow MAX_SELL_FEE");
         sellFee.autoLp = _lp;
         sellFee.marketing = _marketing;
         sellFee.burn = _burn;
