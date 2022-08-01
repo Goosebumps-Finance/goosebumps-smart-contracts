@@ -284,7 +284,7 @@ contract Empire is IERC20, Ownable {
 
     address public marketingWallet;
     address public burnWallet;
-    address public liquidityWallet;
+    address public liquidityMultiSigWallet; // Must be Multi-Signature Wallet.
     address public teamWallet;
 
     IUniswapV2Router02 public uniswapV2Router;
@@ -333,7 +333,7 @@ contract Empire is IERC20, Ownable {
     );
     event LogSetLiquidityWallet(
         address indexed setter,
-        address liquidityWallet
+        address liquidityMultiSigWallet
     );
     event LogSetBurnWallet(address indexed setter, address burnWallet);
     event LogSetTeamWallet(address indexed setter, address teamWallet);
@@ -367,13 +367,13 @@ contract Empire is IERC20, Ownable {
         address _router,
         address _marketingWallet,
         address _teamWallet,
-        address _liquidityWallet
+        address _liquidityMultiSigWallet
     ) {
         _rOwned[_msgSender()] = _rTotal;
 
         marketingWallet = _marketingWallet;
         burnWallet = address(0xdead);
-        liquidityWallet = _liquidityWallet;
+        liquidityMultiSigWallet = _liquidityMultiSigWallet;
         teamWallet = _teamWallet;
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_router);
@@ -786,8 +786,8 @@ contract Empire is IERC20, Ownable {
             !inSwapAndLiquify &&
             !automatedMarketMakerPairs[from] &&
             swapAndLiquifyEnabled &&
-            from != liquidityWallet &&
-            to != liquidityWallet
+            from != liquidityMultiSigWallet &&
+            to != liquidityMultiSigWallet
         ) {
             contractTokenBalance = numTokensSellToAddToLiquidity;
 
@@ -918,7 +918,7 @@ contract Empire is IERC20, Ownable {
             tokenAmount,
             0,
             0,
-            liquidityWallet,
+            liquidityMultiSigWallet,
             block.timestamp
         );
     }
@@ -1114,14 +1114,14 @@ contract Empire is IERC20, Ownable {
         emit LogSetTeamWallet(msg.sender, teamWallet);
     }
 
-    function setLiquidityWallet(address newLiquidityWallet)
+    function setLiquidityWallet(address newLiquidityMultiSigWallet)
         external
         onlyMultiSig
     {
-        require(newLiquidityWallet != address(0), "Zero Address");
-        require(newLiquidityWallet != liquidityWallet, "Same Address");
-        liquidityWallet = newLiquidityWallet;
-        emit LogSetLiquidityWallet(msg.sender, newLiquidityWallet);
+        require(newLiquidityMultiSigWallet != address(0), "Zero Address");
+        require(newLiquidityMultiSigWallet != liquidityMultiSigWallet, "Same Address");
+        liquidityMultiSigWallet = newLiquidityMultiSigWallet;
+        emit LogSetLiquidityWallet(msg.sender, newLiquidityMultiSigWallet);
     }
 
     function setEnableTrading(bool enable) external onlyMultiSig {
