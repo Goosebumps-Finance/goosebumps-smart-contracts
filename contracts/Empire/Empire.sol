@@ -268,13 +268,13 @@ contract Empire is IERC20, Ownable {
     SellFee public sellFee;
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private constant _tTotal = 10**9 * 10**9;
+    uint256 private _tTotal = 10**9 * 10**9;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private constant _name = "Empire Token";
-    string private constant _symbol = "EMPIRE";
-    uint8 private constant _decimals = 9;
+    string private _name = "Empire Token";
+    string private _symbol = "EMPIRE";
+    uint8 private _decimals = 9;
 
     uint256 public _taxFee = 0;
     uint256 public _liquidityFee = 0;
@@ -404,19 +404,19 @@ contract Empire is IERC20, Ownable {
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
-    function name() external pure returns (string memory) {
+    function name() external view returns (string memory) {
         return _name;
     }
 
-    function symbol() external pure returns (string memory) {
+    function symbol() external view returns (string memory) {
         return _symbol;
     }
 
-    function decimals() external pure returns (uint8) {
+    function decimals() external view returns (uint8) {
         return _decimals;
     }
 
-    function totalSupply() external pure override returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _tTotal;
     }
 
