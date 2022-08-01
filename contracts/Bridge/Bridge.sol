@@ -97,7 +97,7 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
         uint256 amount,
         address to,
         uint256 toChainId
-    ) external payable whenNotPaused nonReentrant nonContract {
+    ) external payable whenNotPaused nonReentrant {
         require(toChainId != cID(), "Invalid Bridge");
         require(
             bridgeTokenPair[token][toChainId] != address(0),
@@ -159,16 +159,6 @@ contract Bridge is Ownable, Pausable, ReentrancyGuard {
 
     modifier onlyValidator() {
         require(isValidator(), "DENIED : Not Validator");
-        _;
-    }
-
-    function isContract(address account) internal view returns (bool) {
-        return account.code.length > 0;
-    }
-
-    modifier nonContract() {
-        require(!isContract(msg.sender), "contract not allowed");
-        require(msg.sender == tx.origin, "proxy contract not allowed");
         _;
     }
 

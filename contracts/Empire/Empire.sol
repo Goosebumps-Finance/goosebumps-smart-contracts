@@ -1152,7 +1152,7 @@ contract Empire is IERC20, Ownable {
             "Nothing is changed"
         );
         require(
-            (_lp + _marketing + _burn + _tax + _team) < MAX_BUY_FEE,
+            (_lp + _marketing + _burn + _tax + _team) <= MAX_BUY_FEE,
             "Overflow MAX_BUY_FEE"
         );
         buyFee.autoLp = _lp;
@@ -1180,7 +1180,7 @@ contract Empire is IERC20, Ownable {
             "Nothing is changed"
         );
         require(
-            (_lp + _marketing + _burn + _tax + _team) < MAX_SELL_FEE,
+            (_lp + _marketing + _burn + _tax + _team) <= MAX_SELL_FEE,
             "Overflow MAX_SELL_FEE"
         );
         sellFee.autoLp = _lp;
